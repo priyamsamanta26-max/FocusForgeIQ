@@ -1,39 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FocusForgeIQ - Ultra Advanced</title>
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="css/style.css">
-<meta name="theme-color" content="#2563eb">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StudyTrackIQ - Single File</title>
+<style>
+:root{
+  --bg:#f1f5f9;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --primary:#2563eb;
+  --success:#16a34a;
+  --danger:#dc2626;
+}
+.dark{
+  --bg:#0f172a;
+  --card:#111827;
+  --text:#f8fafc;
+  --muted:#94a3b8;
+  --border:#374151;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:1rem;
+  background:#111827;
+  color:#fff;
+  position:sticky;
+  top:0;
+}
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:1rem;
+  display:grid;
+  gap:1rem;
+}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:1rem;
+}
+.grid{
+  display:grid;
+  gap:1rem;
+}
+.grid-2{
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+}
+.stat{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:1rem;
+  text-align:center;
+}
+.stat span{
+  display:block;
+  font-size:2rem;
+  font-weight:700;
+}
+input,textarea,select{
+  width:100%;
+  padding:.8rem;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+}
+button{
+  border:none;
+  border-radius:12px;
+  padding:.8rem 1rem;
+  background:var(--primary);
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
+button.secondary{
+  background:#334155;
+}
+button.danger{
+  background:var(--danger);
+}
+.row{
+  display:flex;
+  gap:.5rem;
+  flex-wrap:wrap;
+}
+#timer{
+  font-size:4rem;
+  font-weight:800;
+  text-align:center;
+  margin:1rem 0;
+}
+.item{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:.8rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:.5rem;
+  margin-top:.5rem;
+}
+small{color:var(--muted)}
+.hidden{display:none}
+#auth{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1rem;
+  z-index:100;
+}
+#authBox{
+  width:100%;
+  max-width:380px;
+  background:#fff;
+  color:#000;
+  border-radius:24px;
+  padding:2rem;
+}
+#toast{
+  position:fixed;
+  right:1rem;
+  bottom:1rem;
+  background:#111827;
+  color:#fff;
+  padding:.9rem 1rem;
+  border-radius:12px;
+  display:none;
+  z-index:200;
+}
+</style>
 </head>
 <body>
-<header class="topbar">
+
+<div id="auth">
+  <div id="authBox">
+    <h2 id="authTitle">Login</h2>
+    <input id="email" type="email" placeholder="Email" />
+    <div style="height:.7rem"></div>
+    <input id="password" type="password" placeholder="Password" />
+    <div style="height:1rem"></div>
+    <button id="authBtn" style="width:100%">Login</button>
+    <p style="text-align:center;margin-top:1rem">
+      <span id="switchText">Don't have an account?</span>
+      <a href="#" id="switchMode">Create Account</a>
+    </p>
+    <p style="text-align:center;font-size:.9rem;color:#64748b">
+      Demo: demo@studytrackiq.com / 123456
+    </p>
+  </div>
+</div>
+
+<header>
   <div>
-    <h1>🔥 FocusForgeIQ</h1>
-    <p>Forge your focus. Power your intelligence.</p>
+    <h1 style="margin:0">📚 StudyTrackIQ</h1>
+    <small id="todayDate"></small>
   </div>
   <div class="row">
-    <button id="themeBtn">🌙 Theme</button>
+    <button id="themeBtn" class="secondary">🌙 Theme</button>
+    <button id="logoutBtn" class="danger hidden">Logout</button>
   </div>
 </header>
 
-<main class="container">
-  <section class="card hero">
-    <h2>Welcome to FocusForgeIQ</h2>
-    <p id="todayDate"></p>
-  </section>
+<div class="container">
 
-  <section class="grid grid-4">
-    <div class="stat"><span id="streakStat">0</span><small>Streak</small></div>
-    <div class="stat"><span id="sessionStat">0</span><small>Pomodoros</small></div>
-    <div class="stat"><span id="taskStat">0</span><small>Tasks</small></div>
-    <div class="stat"><span id="examStat">0</span><small>Exams</small></div>
-  </section>
+  <div class="card grid grid-2">
+    <div class="stat"><span id="streakStat">0</span>Streak</div>
+    <div class="stat"><span id="sessionStat">0</span>Pomodoros</div>
+    <div class="stat"><span id="examStat">0</span>Exams</div>
+    <div class="stat"><span id="subjectStat">0</span>Subjects</div>
+  </div>
 
-  <section class="card">
-    <h2>⏳ Ultra Pomodoro</h2>
+  <div class="card">
+    <h2>⏳ Pomodoro Timer</h2>
     <div id="timer">25:00</div>
     <div class="row">
       <button onclick="setMode(25)">25m</button>
@@ -42,75 +197,389 @@
       <button onclick="pauseTimer()">Pause</button>
       <button onclick="resetTimer()">Reset</button>
     </div>
-  </section>
+  </div>
 
-  <section class="card">
-    <h2>📝 Smart Notes</h2>
-    <textarea id="notes" rows="8" placeholder="Write your notes..."></textarea>
-    <div class="row">
-      <button onclick="saveNotes()">Save Notes</button>
-      <button onclick="exportNotes()">Export</button>
-    </div>
-  </section>
+  <div class="card">
+    <h2>📝 Notes</h2>
+    <textarea id="notes" rows="6" placeholder="Write your notes here..."></textarea>
+    <div style="height:.6rem"></div>
+    <button onclick="saveNotes()">Save Notes</button>
+  </div>
 
-  <section class="card">
+  <div class="card">
     <h2>🔥 Study Streak</h2>
-    <p id="streakDisplay">0 Days</p>
+    <p id="streakDisplay" style="font-size:2rem;font-weight:700">0 Days</p>
     <button onclick="markStudy()">I Studied Today</button>
-  </section>
+  </div>
 
-  <section class="card">
+  <div class="card">
     <h2>✅ Tasks</h2>
-    <div class="row">
-      <input id="taskInput" placeholder="Task title">
+    <div class="grid grid-2">
+      <input id="taskInput" placeholder="Task title" />
       <button onclick="addTask()">Add Task</button>
     </div>
     <div id="taskList"></div>
-  </section>
+  </div>
 
-  <section class="card">
+  <div class="card">
     <h2>📅 Exam Countdown</h2>
-    <div class="row">
-      <input id="examName" placeholder="Exam name">
-      <input id="examDate" type="date">
-      <button onclick="addExam()">Add Exam</button>
+    <div class="grid grid-2">
+      <input id="examName" placeholder="Exam name" />
+      <input id="examDate" type="date" />
     </div>
+    <div style="height:.6rem"></div>
+    <button onclick="addExam()">Add Exam</button>
     <div id="examList"></div>
-  </section>
+  </div>
 
-  <section class="card">
+  <div class="card">
     <h2>🎓 SGPA Calculator</h2>
-    <div class="row">
-      <input id="subName" placeholder="Subject">
-      <input id="credits" type="number" placeholder="Credits">
+    <div class="grid grid-2">
+      <input id="subName" placeholder="Subject" />
+      <input id="credits" type="number" placeholder="Credits" />
       <select id="grade">
         <option value="10">O (10)</option>
         <option value="9">A+ (9)</option>
         <option value="8">A (8)</option>
         <option value="7">B+ (7)</option>
+        <option value="6">B (6)</option>
       </select>
       <button onclick="addSubject()">Add Subject</button>
     </div>
     <div id="sgpaList"></div>
     <h3 id="sgpaResult">SGPA: 0.00</h3>
-  </section>
+  </div>
 
-  <section class="card">
-    <h2>📊 Analytics</h2>
-    <canvas id="chart" height="120"></canvas>
-  </section>
-</main>
+</div>
 
 <div id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="js/app.js"></script>
-<script src="js/pomodoro.js"></script>
-<script src="js/notes.js"></script>
-<script src="js/tasks.js"></script>
-<script src="js/exams.js"></script>
-<script src="js/sgpa.js"></script>
-<script src="js/streak.js"></script>
-<script src="js/analytics.js"></script>
+<script>
+// ===== Helpers =====
+const $ = id => document.getElementById(id);
+function toast(msg){
+  const t=$('toast');
+  t.textContent=msg;
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none',2500);
+}
+function today(){ return new Date().toISOString().split('T')[0]; }
+
+// ===== Date =====
+function updateDate(){
+  $('todayDate').textContent = new Date().toLocaleDateString('en-IN',{
+    weekday:'long',day:'numeric',month:'long',year:'numeric'
+  });
+}
+updateDate();
+setInterval(updateDate,60000);
+
+// ===== Theme =====
+if(localStorage.getItem('theme')==='dark'){
+  document.documentElement.classList.add('dark');
+}
+$('themeBtn').onclick=()=>{
+  document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme',
+    document.documentElement.classList.contains('dark')?'dark':'light');
+};
+
+// ===== Auth =====
+let loginMode=true;
+(function ensureDemo(){
+  const users=JSON.parse(localStorage.getItem('users')||'{}');
+  if(!users['demo@studytrackiq.com']){
+    users['demo@studytrackiq.com']={password:'123456'};
+    localStorage.setItem('users',JSON.stringify(users));
+  }
+})();
+
+function showApp(email){
+  $('auth').style.display='none';
+  $('logoutBtn').classList.remove('hidden');
+  localStorage.setItem('loggedInUser',email);
+  toast('Welcome '+email);
+}
+
+$('switchMode').onclick=(e)=>{
+  e.preventDefault();
+  loginMode=!loginMode;
+  $('authTitle').textContent=loginMode?'Login':'Create Account';
+  $('authBtn').textContent=loginMode?'Login':'Create Account';
+  $('switchText').textContent=loginMode?
+    "Don't have an account?":'Already have an account?';
+  $('switchMode').textContent=loginMode?'Create Account':'Login';
+};
+
+$('authBtn').onclick=()=>{
+  const email=$('email').value.trim().toLowerCase();
+  const password=$('password').value;
+  let users=JSON.parse(localStorage.getItem('users')||'{}');
+
+  if(!email || !password){
+    toast('Enter email and password');
+    return;
+  }
+
+  if(loginMode){
+    if(users[email] && users[email].password===password){
+      showApp(email);
+    }else{
+      toast('Invalid credentials');
+    }
+  }else{
+    if(users[email]){
+      toast('Account already exists');
+      return;
+    }
+    users[email]={password};
+    localStorage.setItem('users',JSON.stringify(users));
+    toast('Account created, please login');
+    loginMode=true;
+    $('authTitle').textContent='Login';
+    $('authBtn').textContent='Login';
+  }
+};
+
+$('logoutBtn').onclick=()=>{
+  localStorage.removeItem('loggedInUser');
+  location.reload();
+};
+
+const savedUser=localStorage.getItem('loggedInUser');
+if(savedUser) showApp(savedUser);
+
+// ===== Pomodoro =====
+let timeLeft=25*60, timerId=null, currentMinutes=25;
+
+function renderTimer(){
+  const m=String(Math.floor(timeLeft/60)).padStart(2,'0');
+  const s=String(timeLeft%60).padStart(2,'0');
+  $('timer').textContent=`${m}:${s}`;
+}
+
+function setMode(m){
+  pauseTimer();
+  currentMinutes=m;
+  timeLeft=m*60;
+  renderTimer();
+}
+
+function startTimer(){
+  if(timerId) return;
+  timerId=setInterval(()=>{
+    timeLeft--;
+    renderTimer();
+    if(timeLeft<=0){
+      clearInterval(timerId);
+      timerId=null;
+      let sessions=parseInt(localStorage.getItem('sessions')||'0')+1;
+      localStorage.setItem('sessions',sessions);
+      $('sessionStat').textContent=sessions;
+      toast('Pomodoro completed 🎉');
+      setMode(25);
+    }
+  },1000);
+}
+
+function pauseTimer(){
+  clearInterval(timerId);
+  timerId=null;
+}
+
+function resetTimer(){
+  pauseTimer();
+  timeLeft=currentMinutes*60;
+  renderTimer();
+}
+
+renderTimer();
+$('sessionStat').textContent=localStorage.getItem('sessions')||0;
+
+// ===== Notes =====
+const notesKey='notes_'+(localStorage.getItem('loggedInUser')||'guest');
+$('notes').value=localStorage.getItem(notesKey)||'';
+
+function saveNotes(){
+  localStorage.setItem(notesKey,$('notes').value);
+  toast('Notes saved');
+}
+
+$('notes').addEventListener('input',()=>{
+  clearTimeout(window.noteTimer);
+  window.noteTimer=setTimeout(()=>{
+    localStorage.setItem(notesKey,$('notes').value);
+  },3000);
+});
+
+// ===== Streak =====
+let streak=JSON.parse(localStorage.getItem('streak')||
+  '{"count":0,"last":""}');
+
+function renderStreak(){
+  $('streakDisplay').textContent=
+    `${streak.count} Day${streak.count===1?'':'s'}`;
+  $('streakStat').textContent=streak.count;
+}
+
+function markStudy(){
+  if(streak.last===today()){
+    toast('Already marked today');
+    return;
+  }
+  const y=new Date();
+  y.setDate(y.getDate()-1);
+  const ys=y.toISOString().split('T')[0];
+
+  streak.count = streak.last===ys ? streak.count+1 : 1;
+  streak.last=today();
+
+  localStorage.setItem('streak',JSON.stringify(streak));
+  renderStreak();
+  toast('Streak updated 🔥');
+}
+
+renderStreak();
+
+// ===== Tasks =====
+let tasks=JSON.parse(localStorage.getItem('tasks')||'[]');
+
+function renderTasks(){
+  $('taskList').innerHTML='';
+  tasks.forEach((t,i)=>{
+    const div=document.createElement('div');
+    div.className='item';
+    div.innerHTML=`
+      <div>
+        <strong style="${t.done?'text-decoration:line-through':''}">${t.title}</strong>
+      </div>
+      <div class="row">
+        <button onclick="toggleTask(${i})">${t.done?'Undo':'Done'}</button>
+        <button class="danger" onclick="deleteTask(${i})">Delete</button>
+      </div>`;
+    $('taskList').appendChild(div);
+  });
+}
+
+function addTask(){
+  const title=$('taskInput').value.trim();
+  if(!title) return;
+  tasks.push({title,done:false});
+  localStorage.setItem('tasks',JSON.stringify(tasks));
+  $('taskInput').value='';
+  renderTasks();
+}
+
+function toggleTask(i){
+  tasks[i].done=!tasks[i].done;
+  localStorage.setItem('tasks',JSON.stringify(tasks));
+  renderTasks();
+}
+
+function deleteTask(i){
+  tasks.splice(i,1);
+  localStorage.setItem('tasks',JSON.stringify(tasks));
+  renderTasks();
+}
+
+renderTasks();
+
+// ===== Exams =====
+let exams=JSON.parse(localStorage.getItem('exams')||'[]');
+
+function renderExams(){
+  $('examList').innerHTML='';
+  exams.sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+  exams.forEach((e,i)=>{
+    const days=Math.ceil((new Date(e.date)-new Date(today()))/86400000);
+    const div=document.createElement('div');
+    div.className='item';
+    div.innerHTML=`
+      <div>
+        <strong>${e.name}</strong><br>
+        <small>${e.date} • ${days} days left</small>
+      </div>
+      <button class="danger" onclick="removeExam(${i})">Delete</button>`;
+    $('examList').appendChild(div);
+  });
+
+  $('examStat').textContent=exams.length;
+}
+
+function addExam(){
+  const name=$('examName').value.trim();
+  const date=$('examDate').value;
+  if(!name || !date) return;
+
+  exams.push({name,date});
+  localStorage.setItem('exams',JSON.stringify(exams));
+
+  $('examName').value='';
+  $('examDate').value='';
+
+  renderExams();
+}
+
+function removeExam(i){
+  exams.splice(i,1);
+  localStorage.setItem('exams',JSON.stringify(exams));
+  renderExams();
+}
+
+renderExams();
+
+// ===== SGPA =====
+let subjects=JSON.parse(localStorage.getItem('subjects')||'[]');
+
+function renderSubjects(){
+  $('sgpaList').innerHTML='';
+  let tc=0,tp=0;
+
+  subjects.forEach((s,i)=>{
+    tc+=s.credits;
+    tp+=s.credits*s.grade;
+
+    const div=document.createElement('div');
+    div.className='item';
+    div.innerHTML=`
+      <div>
+        <strong>${s.name}</strong><br>
+        <small>Credits: ${s.credits} | Grade: ${s.grade}</small>
+      </div>
+      <button class="danger" onclick="removeSubject(${i})">Delete</button>`;
+
+    $('sgpaList').appendChild(div);
+  });
+
+  const sgpa=tc?(tp/tc).toFixed(2):'0.00';
+  $('sgpaResult').textContent='SGPA: '+sgpa;
+  $('subjectStat').textContent=subjects.length;
+}
+
+function addSubject(){
+  const name=$('subName').value.trim();
+  const credits=parseFloat($('credits').value);
+  const grade=parseFloat($('grade').value);
+
+  if(!name || isNaN(credits)) return;
+
+  subjects.push({name,credits,grade});
+  localStorage.setItem('subjects',JSON.stringify(subjects));
+
+  $('subName').value='';
+  $('credits').value='';
+
+  renderSubjects();
+}
+
+function removeSubject(i){
+  subjects.splice(i,1);
+  localStorage.setItem('subjects',JSON.stringify(subjects));
+  renderSubjects();
+}
+
+renderSubjects();
+</script>
 </body>
 </html>
