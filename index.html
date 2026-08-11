@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>StudyTrackIQ - Single File</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusForgeIQ - Ultra Advanced</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
   --bg:#f1f5f9;
@@ -34,13 +35,16 @@ header{
   justify-content:space-between;
   align-items:center;
   padding:1rem;
-  background:#111827;
+  background:#0f172a;
   color:#fff;
   position:sticky;
   top:0;
+  z-index:10;
 }
+header h1{margin:0}
+header p{margin:0;color:#cbd5e1;font-size:.9rem}
 .container{
-  max-width:1100px;
+  max-width:1200px;
   margin:auto;
   padding:1rem;
   display:grid;
@@ -49,19 +53,16 @@ header{
 .card{
   background:var(--card);
   border:1px solid var(--border);
-  border-radius:18px;
+  border-radius:20px;
   padding:1rem;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
-.grid{
-  display:grid;
-  gap:1rem;
-}
-.grid-2{
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-}
+.grid{display:grid;gap:1rem}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.grid-4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
 .stat{
   border:1px solid var(--border);
-  border-radius:14px;
+  border-radius:16px;
   padding:1rem;
   text-align:center;
 }
@@ -69,6 +70,12 @@ header{
   display:block;
   font-size:2rem;
   font-weight:700;
+}
+.row{
+  display:flex;
+  gap:.5rem;
+  flex-wrap:wrap;
+  align-items:center;
 }
 input,textarea,select{
   width:100%;
@@ -87,22 +94,18 @@ button{
   font-weight:700;
   cursor:pointer;
 }
-button.secondary{
-  background:#334155;
-}
-button.danger{
-  background:var(--danger);
-}
-.row{
-  display:flex;
-  gap:.5rem;
-  flex-wrap:wrap;
-}
+button.secondary{background:#334155}
+button.danger{background:var(--danger)}
 #timer{
   font-size:4rem;
   font-weight:800;
   text-align:center;
   margin:1rem 0;
+}
+#timerMode{
+  text-align:center;
+  font-weight:700;
+  color:var(--primary);
 }
 .item{
   border:1px solid var(--border);
@@ -115,25 +118,6 @@ button.danger{
   margin-top:.5rem;
 }
 small{color:var(--muted)}
-.hidden{display:none}
-#auth{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:1rem;
-  z-index:100;
-}
-#authBox{
-  width:100%;
-  max-width:380px;
-  background:#fff;
-  color:#000;
-  border-radius:24px;
-  padding:2rem;
-}
 #toast{
   position:fixed;
   right:1rem;
@@ -143,100 +127,107 @@ small{color:var(--muted)}
   padding:.9rem 1rem;
   border-radius:12px;
   display:none;
-  z-index:200;
+  z-index:100;
+}
+canvas{
+  max-width:100%;
+}
+@media(max-width:600px){
+  #timer{font-size:3rem}
+  header{flex-direction:column;align-items:flex-start;gap:.5rem}
 }
 </style>
 </head>
 <body>
 
-<div id="auth">
-  <div id="authBox">
-    <h2 id="authTitle">Login</h2>
-    <input id="email" type="email" placeholder="Email" />
-    <div style="height:.7rem"></div>
-    <input id="password" type="password" placeholder="Password" />
-    <div style="height:1rem"></div>
-    <button id="authBtn" style="width:100%">Login</button>
-    <p style="text-align:center;margin-top:1rem">
-      <span id="switchText">Don't have an account?</span>
-      <a href="#" id="switchMode">Create Account</a>
-    </p>
-    <p style="text-align:center;font-size:.9rem;color:#64748b">
-      Demo: demo@studytrackiq.com / 123456
-    </p>
-  </div>
-</div>
-
 <header>
   <div>
-    <h1 style="margin:0">📚 StudyTrackIQ</h1>
-    <small id="todayDate"></small>
+    <h1>🔥 FocusForgeIQ</h1>
+    <p>Forge your focus. Power your intelligence.</p>
   </div>
-  <div class="row">
-    <button id="themeBtn" class="secondary">🌙 Theme</button>
-    <button id="logoutBtn" class="danger hidden">Logout</button>
-  </div>
+  <button id="themeBtn" class="secondary">🌙 Theme</button>
 </header>
 
 <div class="container">
 
-  <div class="card grid grid-2">
+  <section class="card">
+    <h2>Welcome to FocusForgeIQ</h2>
+    <p id="todayDate"></p>
+  </section>
+
+  <section class="grid grid-4">
     <div class="stat"><span id="streakStat">0</span>Streak</div>
     <div class="stat"><span id="sessionStat">0</span>Pomodoros</div>
+    <div class="stat"><span id="taskStat">0</span>Tasks</div>
     <div class="stat"><span id="examStat">0</span>Exams</div>
-    <div class="stat"><span id="subjectStat">0</span>Subjects</div>
-  </div>
+  </section>
 
-  <div class="card">
-    <h2>⏳ Pomodoro Timer</h2>
+  <section class="card">
+    <h2>⏳ Ultra Pomodoro (Custom Time)</h2>
+
     <div id="timer">25:00</div>
-    <div class="row">
-      <button onclick="setMode(25)">25m</button>
-      <button onclick="setMode(50)">50m</button>
+    <p id="timerMode">Mode: Study</p>
+
+    <div class="grid grid-2">
+      <div>
+        <label>Study Minutes</label>
+        <input id="studyInput" type="number" min="1" max="300" value="25">
+      </div>
+
+      <div>
+        <label>Break Minutes</label>
+        <input id="breakInput" type="number" min="1" max="120" value="5">
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:1rem">
+      <button onclick="applyCustomTime()">Apply Time</button>
       <button onclick="startTimer()">Start</button>
       <button onclick="pauseTimer()">Pause</button>
       <button onclick="resetTimer()">Reset</button>
     </div>
-  </div>
+  </section>
 
-  <div class="card">
-    <h2>📝 Notes</h2>
+  <section class="card">
+    <h2>📝 Smart Notes</h2>
     <textarea id="notes" rows="6" placeholder="Write your notes here..."></textarea>
-    <div style="height:.6rem"></div>
-    <button onclick="saveNotes()">Save Notes</button>
-  </div>
+    <div class="row" style="margin-top:.5rem">
+      <button onclick="saveNotes()">Save Notes</button>
+      <button onclick="exportNotes()">Export Notes</button>
+    </div>
+  </section>
 
-  <div class="card">
+  <section class="card">
     <h2>🔥 Study Streak</h2>
     <p id="streakDisplay" style="font-size:2rem;font-weight:700">0 Days</p>
     <button onclick="markStudy()">I Studied Today</button>
-  </div>
+  </section>
 
-  <div class="card">
+  <section class="card">
     <h2>✅ Tasks</h2>
-    <div class="grid grid-2">
-      <input id="taskInput" placeholder="Task title" />
+    <div class="row">
+      <input id="taskInput" placeholder="Task title">
       <button onclick="addTask()">Add Task</button>
     </div>
     <div id="taskList"></div>
-  </div>
+  </section>
 
-  <div class="card">
+  <section class="card">
     <h2>📅 Exam Countdown</h2>
     <div class="grid grid-2">
-      <input id="examName" placeholder="Exam name" />
-      <input id="examDate" type="date" />
+      <input id="examName" placeholder="Exam name">
+      <input id="examDate" type="date">
     </div>
-    <div style="height:.6rem"></div>
+    <div style="height:.5rem"></div>
     <button onclick="addExam()">Add Exam</button>
     <div id="examList"></div>
-  </div>
+  </section>
 
-  <div class="card">
+  <section class="card">
     <h2>🎓 SGPA Calculator</h2>
     <div class="grid grid-2">
-      <input id="subName" placeholder="Subject" />
-      <input id="credits" type="number" placeholder="Credits" />
+      <input id="subName" placeholder="Subject">
+      <input id="credits" type="number" placeholder="Credits">
       <select id="grade">
         <option value="10">O (10)</option>
         <option value="9">A+ (9)</option>
@@ -248,7 +239,12 @@ small{color:var(--muted)}
     </div>
     <div id="sgpaList"></div>
     <h3 id="sgpaResult">SGPA: 0.00</h3>
-  </div>
+  </section>
+
+  <section class="card">
+    <h2>📊 Weekly Analytics</h2>
+    <canvas id="analyticsChart" height="120"></canvas>
+  </section>
 
 </div>
 
@@ -257,165 +253,183 @@ small{color:var(--muted)}
 <script>
 // ===== Helpers =====
 const $ = id => document.getElementById(id);
+
 function toast(msg){
-  const t=$('toast');
-  t.textContent=msg;
-  t.style.display='block';
-  setTimeout(()=>t.style.display='none',2500);
+  const t = $('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2500);
 }
-function today(){ return new Date().toISOString().split('T')[0]; }
 
 // ===== Date =====
 function updateDate(){
   $('todayDate').textContent = new Date().toLocaleDateString('en-IN',{
-    weekday:'long',day:'numeric',month:'long',year:'numeric'
+    weekday:'long',
+    day:'numeric',
+    month:'long',
+    year:'numeric'
   });
 }
 updateDate();
-setInterval(updateDate,60000);
+setInterval(updateDate, 60000);
 
 // ===== Theme =====
-if(localStorage.getItem('theme')==='dark'){
+if(localStorage.getItem('ffi_theme') === 'dark'){
   document.documentElement.classList.add('dark');
 }
-$('themeBtn').onclick=()=>{
+$('themeBtn').onclick = () => {
   document.documentElement.classList.toggle('dark');
-  localStorage.setItem('theme',
-    document.documentElement.classList.contains('dark')?'dark':'light');
+  localStorage.setItem('ffi_theme',
+    document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 };
 
-// ===== Auth =====
-let loginMode=true;
-(function ensureDemo(){
-  const users=JSON.parse(localStorage.getItem('users')||'{}');
-  if(!users['demo@studytrackiq.com']){
-    users['demo@studytrackiq.com']={password:'123456'};
-    localStorage.setItem('users',JSON.stringify(users));
-  }
-})();
+// ===== Custom Pomodoro =====
+let studyMinutes = parseInt(localStorage.getItem('ffi_study') || '25');
+let breakMinutes = parseInt(localStorage.getItem('ffi_break') || '5');
 
-function showApp(email){
-  $('auth').style.display='none';
-  $('logoutBtn').classList.remove('hidden');
-  localStorage.setItem('loggedInUser',email);
-  toast('Welcome '+email);
+$('studyInput').value = studyMinutes;
+$('breakInput').value = breakMinutes;
+
+let currentMinutes = studyMinutes;
+let timeLeft = currentMinutes * 60;
+let timerId = null;
+let isBreak = false;
+
+function renderTimer(){
+  const m = String(Math.floor(timeLeft / 60)).padStart(2,'0');
+  const s = String(timeLeft % 60).padStart(2,'0');
+  $('timer').textContent = `${m}:${s}`;
 }
 
-$('switchMode').onclick=(e)=>{
-  e.preventDefault();
-  loginMode=!loginMode;
-  $('authTitle').textContent=loginMode?'Login':'Create Account';
-  $('authBtn').textContent=loginMode?'Login':'Create Account';
-  $('switchText').textContent=loginMode?
-    "Don't have an account?":'Already have an account?';
-  $('switchMode').textContent=loginMode?'Create Account':'Login';
-};
+function applyCustomTime(){
+  const study = parseInt($('studyInput').value);
+  const brk = parseInt($('breakInput').value);
 
-$('authBtn').onclick=()=>{
-  const email=$('email').value.trim().toLowerCase();
-  const password=$('password').value;
-  let users=JSON.parse(localStorage.getItem('users')||'{}');
-
-  if(!email || !password){
-    toast('Enter email and password');
+  if(isNaN(study) || study < 1 || study > 300){
+    toast('Study time must be 1-300 minutes');
+    return;
+  }
+  if(isNaN(brk) || brk < 1 || brk > 120){
+    toast('Break time must be 1-120 minutes');
     return;
   }
 
-  if(loginMode){
-    if(users[email] && users[email].password===password){
-      showApp(email);
-    }else{
-      toast('Invalid credentials');
+  studyMinutes = study;
+  breakMinutes = brk;
+
+  localStorage.setItem('ffi_study', studyMinutes);
+  localStorage.setItem('ffi_break', breakMinutes);
+
+  pauseTimer();
+  isBreak = false;
+  currentMinutes = studyMinutes;
+  timeLeft = currentMinutes * 60;
+  $('timerMode').textContent = 'Mode: Study';
+  renderTimer();
+
+  toast(`Timer set: ${studyMinutes}m study / ${breakMinutes}m break`);
+}
+
+function startTimer(){
+  if(timerId) return;
+
+  timerId = setInterval(() => {
+    timeLeft--;
+    renderTimer();
+
+    if(timeLeft <= 0){
+      clearInterval(timerId);
+      timerId = null;
+
+      if(!isBreak){
+        let sessions = parseInt(localStorage.getItem('ffi_sessions') || '0') + 1;
+        localStorage.setItem('ffi_sessions', sessions);
+        $('sessionStat').textContent = sessions;
+
+        toast('Study session completed! Break started.');
+
+        isBreak = true;
+        currentMinutes = breakMinutes;
+        timeLeft = currentMinutes * 60;
+        $('timerMode').textContent = 'Mode: Break';
+      }else{
+        toast('Break completed! Study session ready.');
+
+        isBreak = false;
+        currentMinutes = studyMinutes;
+        timeLeft = currentMinutes * 60;
+        $('timerMode').textContent = 'Mode: Study';
+      }
+
+      renderTimer();
     }
-  }else{
-    if(users[email]){
-      toast('Account already exists');
-      return;
-    }
-    users[email]={password};
-    localStorage.setItem('users',JSON.stringify(users));
-    toast('Account created, please login');
-    loginMode=true;
-    $('authTitle').textContent='Login';
-    $('authBtn').textContent='Login';
-  }
-};
+  }, 1000);
+}
 
-$('logoutBtn').onclick=()=>{
-  localStorage.removeItem('loggedInUser');
-  location.reload();
-};
+function pauseTimer(){
+  clearInterval(timerId);
+  timerId = null;
+}
 
-const savedUser=localStorage.getItem('loggedInUser');
-if(savedUser) showApp(savedUser);
+function resetTimer(){
+  pauseTimer();
+  currentMinutes = isBreak ? breakMinutes : studyMinutes;
+  timeLeft = currentMinutes * 60;
+  renderTimer();
+}
 
-// ===== Pomodoro =====
-<section class="card">
-  <h2>⏳ Ultra Pomodoro (Custom Time)</h2>
-
-  <div id="timer">25:00</div>
-
-  <div class="grid grid-2">
-    <div>
-      <label>Study Minutes</label>
-      <input id="studyInput" type="number" min="1" max="300" value="25">
-    </div>
-
-    <div>
-      <label>Break Minutes</label>
-      <input id="breakInput" type="number" min="1" max="120" value="5">
-    </div>
-  </div>
-
-  <div class="row" style="margin-top:1rem">
-    <button onclick="applyCustomTime()">Apply Time</button>
-    <button onclick="startTimer()">Start</button>
-    <button onclick="pauseTimer()">Pause</button>
-    <button onclick="resetTimer()">Reset</button>
-  </div>
-
-  <p id="timerMode">Mode: Study</p>
-</section>
+renderTimer();
+$('sessionStat').textContent = localStorage.getItem('ffi_sessions') || '0';
 
 // ===== Notes =====
-const notesKey='notes_'+(localStorage.getItem('loggedInUser')||'guest');
-$('notes').value=localStorage.getItem(notesKey)||'';
+$('notes').value = localStorage.getItem('ffi_notes') || '';
 
 function saveNotes(){
-  localStorage.setItem(notesKey,$('notes').value);
+  localStorage.setItem('ffi_notes', $('notes').value);
   toast('Notes saved');
 }
 
-$('notes').addEventListener('input',()=>{
+function exportNotes(){
+  const blob = new Blob([$('notes').value], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'FocusForgeIQ_Notes.txt';
+  a.click();
+}
+
+$('notes').addEventListener('input', () => {
   clearTimeout(window.noteTimer);
-  window.noteTimer=setTimeout(()=>{
-    localStorage.setItem(notesKey,$('notes').value);
-  },3000);
+  window.noteTimer = setTimeout(() => {
+    localStorage.setItem('ffi_notes', $('notes').value);
+  }, 2000);
 });
 
 // ===== Streak =====
-let streak=JSON.parse(localStorage.getItem('streak')||
+function today(){ return new Date().toISOString().split('T')[0]; }
+
+let streak = JSON.parse(localStorage.getItem('ffi_streak') ||
   '{"count":0,"last":""}');
 
 function renderStreak(){
-  $('streakDisplay').textContent=
-    `${streak.count} Day${streak.count===1?'':'s'}`;
-  $('streakStat').textContent=streak.count;
+  $('streakDisplay').textContent =
+    `${streak.count} Day${streak.count === 1 ? '' : 's'}`;
+  $('streakStat').textContent = streak.count;
 }
 
 function markStudy(){
-  if(streak.last===today()){
+  if(streak.last === today()){
     toast('Already marked today');
     return;
   }
-  const y=new Date();
-  y.setDate(y.getDate()-1);
-  const ys=y.toISOString().split('T')[0];
 
-  streak.count = streak.last===ys ? streak.count+1 : 1;
-  streak.last=today();
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  const ys = y.toISOString().split('T')[0];
 
-  localStorage.setItem('streak',JSON.stringify(streak));
+  streak.count = streak.last === ys ? streak.count + 1 : 1;
+  streak.last = today();
+
+  localStorage.setItem('ffi_streak', JSON.stringify(streak));
   renderStreak();
   toast('Streak updated 🔥');
 }
@@ -423,107 +437,115 @@ function markStudy(){
 renderStreak();
 
 // ===== Tasks =====
-let tasks=JSON.parse(localStorage.getItem('tasks')||'[]');
+let tasks = JSON.parse(localStorage.getItem('ffi_tasks') || '[]');
 
 function renderTasks(){
-  $('taskList').innerHTML='';
-  tasks.forEach((t,i)=>{
-    const div=document.createElement('div');
-    div.className='item';
-    div.innerHTML=`
-      <div>
-        <strong style="${t.done?'text-decoration:line-through':''}">${t.title}</strong>
-      </div>
+  $('taskList').innerHTML = '';
+
+  tasks.forEach((t,i) => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+      <span style="${t.done ? 'text-decoration:line-through' : ''}">${t.title}</span>
       <div class="row">
-        <button onclick="toggleTask(${i})">${t.done?'Undo':'Done'}</button>
+        <button onclick="toggleTask(${i})">${t.done ? 'Undo' : 'Done'}</button>
         <button class="danger" onclick="deleteTask(${i})">Delete</button>
       </div>`;
     $('taskList').appendChild(div);
   });
+
+  $('taskStat').textContent = tasks.length;
 }
 
 function addTask(){
-  const title=$('taskInput').value.trim();
+  const title = $('taskInput').value.trim();
   if(!title) return;
-  tasks.push({title,done:false});
-  localStorage.setItem('tasks',JSON.stringify(tasks));
-  $('taskInput').value='';
+
+  tasks.push({title, done:false});
+  localStorage.setItem('ffi_tasks', JSON.stringify(tasks));
+
+  $('taskInput').value = '';
   renderTasks();
 }
 
 function toggleTask(i){
-  tasks[i].done=!tasks[i].done;
-  localStorage.setItem('tasks',JSON.stringify(tasks));
+  tasks[i].done = !tasks[i].done;
+  localStorage.setItem('ffi_tasks', JSON.stringify(tasks));
   renderTasks();
 }
 
 function deleteTask(i){
   tasks.splice(i,1);
-  localStorage.setItem('tasks',JSON.stringify(tasks));
+  localStorage.setItem('ffi_tasks', JSON.stringify(tasks));
   renderTasks();
 }
 
 renderTasks();
 
 // ===== Exams =====
-let exams=JSON.parse(localStorage.getItem('exams')||'[]');
+let exams = JSON.parse(localStorage.getItem('ffi_exams') || '[]');
 
 function renderExams(){
-  $('examList').innerHTML='';
-  exams.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  $('examList').innerHTML = '';
 
-  exams.forEach((e,i)=>{
-    const days=Math.ceil((new Date(e.date)-new Date(today()))/86400000);
-    const div=document.createElement('div');
-    div.className='item';
-    div.innerHTML=`
+  exams.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  exams.forEach((e,i) => {
+    const days = Math.ceil((new Date(e.date) - new Date(today())) / 86400000);
+
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
       <div>
         <strong>${e.name}</strong><br>
         <small>${e.date} • ${days} days left</small>
       </div>
       <button class="danger" onclick="removeExam(${i})">Delete</button>`;
+
     $('examList').appendChild(div);
   });
 
-  $('examStat').textContent=exams.length;
+  $('examStat').textContent = exams.length;
 }
 
 function addExam(){
-  const name=$('examName').value.trim();
-  const date=$('examDate').value;
+  const name = $('examName').value.trim();
+  const date = $('examDate').value;
+
   if(!name || !date) return;
 
   exams.push({name,date});
-  localStorage.setItem('exams',JSON.stringify(exams));
+  localStorage.setItem('ffi_exams', JSON.stringify(exams));
 
-  $('examName').value='';
-  $('examDate').value='';
+  $('examName').value = '';
+  $('examDate').value = '';
 
   renderExams();
 }
 
 function removeExam(i){
   exams.splice(i,1);
-  localStorage.setItem('exams',JSON.stringify(exams));
+  localStorage.setItem('ffi_exams', JSON.stringify(exams));
   renderExams();
 }
 
 renderExams();
 
 // ===== SGPA =====
-let subjects=JSON.parse(localStorage.getItem('subjects')||'[]');
+let subjects = JSON.parse(localStorage.getItem('ffi_subjects') || '[]');
 
 function renderSubjects(){
-  $('sgpaList').innerHTML='';
-  let tc=0,tp=0;
+  $('sgpaList').innerHTML = '';
 
-  subjects.forEach((s,i)=>{
-    tc+=s.credits;
-    tp+=s.credits*s.grade;
+  let tc = 0, tp = 0;
 
-    const div=document.createElement('div');
-    div.className='item';
-    div.innerHTML=`
+  subjects.forEach((s,i) => {
+    tc += s.credits;
+    tp += s.credits * s.grade;
+
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
       <div>
         <strong>${s.name}</strong><br>
         <small>Credits: ${s.credits} | Grade: ${s.grade}</small>
@@ -533,34 +555,52 @@ function renderSubjects(){
     $('sgpaList').appendChild(div);
   });
 
-  const sgpa=tc?(tp/tc).toFixed(2):'0.00';
-  $('sgpaResult').textContent='SGPA: '+sgpa;
-  $('subjectStat').textContent=subjects.length;
+  const sgpa = tc ? (tp/tc).toFixed(2) : '0.00';
+  $('sgpaResult').textContent = 'SGPA: ' + sgpa;
 }
 
 function addSubject(){
-  const name=$('subName').value.trim();
-  const credits=parseFloat($('credits').value);
-  const grade=parseFloat($('grade').value);
+  const name = $('subName').value.trim();
+  const credits = parseFloat($('credits').value);
+  const grade = parseFloat($('grade').value);
 
   if(!name || isNaN(credits)) return;
 
   subjects.push({name,credits,grade});
-  localStorage.setItem('subjects',JSON.stringify(subjects));
+  localStorage.setItem('ffi_subjects', JSON.stringify(subjects));
 
-  $('subName').value='';
-  $('credits').value='';
+  $('subName').value = '';
+  $('credits').value = '';
 
   renderSubjects();
 }
 
 function removeSubject(i){
   subjects.splice(i,1);
-  localStorage.setItem('subjects',JSON.stringify(subjects));
+  localStorage.setItem('ffi_subjects', JSON.stringify(subjects));
   renderSubjects();
 }
 
 renderSubjects();
+
+// ===== Analytics Chart =====
+const ctx = document.getElementById('analyticsChart');
+
+new Chart(ctx, {
+  type:'bar',
+  data:{
+    labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets:[{
+      label:'Study Hours',
+      data:[1,2,1.5,3,2.5,4,2],
+      borderWidth:1
+    }]
+  },
+  options:{
+    responsive:true,
+    maintainAspectRatio:true
+  }
+});
 </script>
 </body>
 </html>
