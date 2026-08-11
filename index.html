@@ -350,51 +350,32 @@ const savedUser=localStorage.getItem('loggedInUser');
 if(savedUser) showApp(savedUser);
 
 // ===== Pomodoro =====
-let timeLeft=25*60, timerId=null, currentMinutes=25;
+<section class="card">
+  <h2>⏳ Ultra Pomodoro (Custom Time)</h2>
 
-function renderTimer(){
-  const m=String(Math.floor(timeLeft/60)).padStart(2,'0');
-  const s=String(timeLeft%60).padStart(2,'0');
-  $('timer').textContent=`${m}:${s}`;
-}
+  <div id="timer">25:00</div>
 
-function setMode(m){
-  pauseTimer();
-  currentMinutes=m;
-  timeLeft=m*60;
-  renderTimer();
-}
+  <div class="grid grid-2">
+    <div>
+      <label>Study Minutes</label>
+      <input id="studyInput" type="number" min="1" max="300" value="25">
+    </div>
 
-function startTimer(){
-  if(timerId) return;
-  timerId=setInterval(()=>{
-    timeLeft--;
-    renderTimer();
-    if(timeLeft<=0){
-      clearInterval(timerId);
-      timerId=null;
-      let sessions=parseInt(localStorage.getItem('sessions')||'0')+1;
-      localStorage.setItem('sessions',sessions);
-      $('sessionStat').textContent=sessions;
-      toast('Pomodoro completed 🎉');
-      setMode(25);
-    }
-  },1000);
-}
+    <div>
+      <label>Break Minutes</label>
+      <input id="breakInput" type="number" min="1" max="120" value="5">
+    </div>
+  </div>
 
-function pauseTimer(){
-  clearInterval(timerId);
-  timerId=null;
-}
+  <div class="row" style="margin-top:1rem">
+    <button onclick="applyCustomTime()">Apply Time</button>
+    <button onclick="startTimer()">Start</button>
+    <button onclick="pauseTimer()">Pause</button>
+    <button onclick="resetTimer()">Reset</button>
+  </div>
 
-function resetTimer(){
-  pauseTimer();
-  timeLeft=currentMinutes*60;
-  renderTimer();
-}
-
-renderTimer();
-$('sessionStat').textContent=localStorage.getItem('sessions')||0;
+  <p id="timerMode">Mode: Study</p>
+</section>
 
 // ===== Notes =====
 const notesKey='notes_'+(localStorage.getItem('loggedInUser')||'guest');
