@@ -1,5 +1,0 @@
-let subjects=JSON.parse(localStorage.getItem('ff_subjects')||'[]');
-function renderSubjects(){$('sgpaList').innerHTML='';let tc=0,tp=0;subjects.forEach((s,i)=>{tc+=s.credits;tp+=s.credits*s.grade;const d=document.createElement('div');d.className='item';d.innerHTML=`<div><strong>${s.name}</strong><br><small>Credits: ${s.credits} | Grade: ${s.grade}</small></div><button onclick="removeSubject(${i})">Delete</button>`;$('sgpaList').appendChild(d);});$('sgpaResult').textContent='SGPA: '+(tc?(tp/tc).toFixed(2):'0.00');$('subjectStat').textContent=subjects.length;}
-function addSubject(){const name=$('subName').value.trim();const credits=parseFloat($('credits').value);const grade=parseFloat($('grade').value);if(!name||isNaN(credits))return;subjects.push({name,credits,grade});localStorage.setItem('ff_subjects',JSON.stringify(subjects));$('subName').value='';$('credits').value='';renderSubjects();}
-function removeSubject(i){subjects.splice(i,1);localStorage.setItem('ff_subjects',JSON.stringify(subjects));renderSubjects();}
-renderSubjects();
