@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusForgeIQ - Ultra Advanced</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css">
+<meta name="theme-color" content="#2563eb">
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>🔥 FocusForgeIQ</h1>
+    <p>Forge your focus. Power your intelligence.</p>
+  </div>
+  <div class="row">
+    <button id="themeBtn">🌙 Theme</button>
+  </div>
+</header>
+
+<main class="container">
+  <section class="card hero">
+    <h2>Welcome to FocusForgeIQ</h2>
+    <p id="todayDate"></p>
+  </section>
+
+  <section class="grid grid-4">
+    <div class="stat"><span id="streakStat">0</span><small>Streak</small></div>
+    <div class="stat"><span id="sessionStat">0</span><small>Pomodoros</small></div>
+    <div class="stat"><span id="taskStat">0</span><small>Tasks</small></div>
+    <div class="stat"><span id="examStat">0</span><small>Exams</small></div>
+  </section>
+
+  <section class="card">
+    <h2>⏳ Ultra Pomodoro</h2>
+    <div id="timer">25:00</div>
+    <div class="row">
+      <button onclick="setMode(25)">25m</button>
+      <button onclick="setMode(50)">50m</button>
+      <button onclick="startTimer()">Start</button>
+      <button onclick="pauseTimer()">Pause</button>
+      <button onclick="resetTimer()">Reset</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>📝 Smart Notes</h2>
+    <textarea id="notes" rows="8" placeholder="Write your notes..."></textarea>
+    <div class="row">
+      <button onclick="saveNotes()">Save Notes</button>
+      <button onclick="exportNotes()">Export</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>🔥 Study Streak</h2>
+    <p id="streakDisplay">0 Days</p>
+    <button onclick="markStudy()">I Studied Today</button>
+  </section>
+
+  <section class="card">
+    <h2>✅ Tasks</h2>
+    <div class="row">
+      <input id="taskInput" placeholder="Task title">
+      <button onclick="addTask()">Add Task</button>
+    </div>
+    <div id="taskList"></div>
+  </section>
+
+  <section class="card">
+    <h2>📅 Exam Countdown</h2>
+    <div class="row">
+      <input id="examName" placeholder="Exam name">
+      <input id="examDate" type="date">
+      <button onclick="addExam()">Add Exam</button>
+    </div>
+    <div id="examList"></div>
+  </section>
+
+  <section class="card">
+    <h2>🎓 SGPA Calculator</h2>
+    <div class="row">
+      <input id="subName" placeholder="Subject">
+      <input id="credits" type="number" placeholder="Credits">
+      <select id="grade">
+        <option value="10">O (10)</option>
+        <option value="9">A+ (9)</option>
+        <option value="8">A (8)</option>
+        <option value="7">B+ (7)</option>
+      </select>
+      <button onclick="addSubject()">Add Subject</button>
+    </div>
+    <div id="sgpaList"></div>
+    <h3 id="sgpaResult">SGPA: 0.00</h3>
+  </section>
+
+  <section class="card">
+    <h2>📊 Analytics</h2>
+    <canvas id="chart" height="120"></canvas>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pomodoro.js"></script>
+<script src="js/notes.js"></script>
+<script src="js/tasks.js"></script>
+<script src="js/exams.js"></script>
+<script src="js/sgpa.js"></script>
+<script src="js/streak.js"></script>
+<script src="js/analytics.js"></script>
+</body>
+</html>
