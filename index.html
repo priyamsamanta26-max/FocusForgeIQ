@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FocusForgeIQ - Ultra Advanced</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 :root{
   --bg:#f1f5f9;
@@ -13,6 +14,7 @@
   --muted:#64748b;
   --border:#e2e8f0;
   --primary:#2563eb;
+  --success:#16a34a;
   --danger:#dc2626;
 }
 .dark{
@@ -36,11 +38,14 @@ header{
   padding:1rem;
   background:#0f172a;
   color:#fff;
+  position:sticky;
+  top:0;
+  z-index:10;
 }
 header h1{margin:0}
 header p{margin:0;color:#cbd5e1;font-size:.9rem}
 .container{
-  max-width:1100px;
+  max-width:1200px;
   margin:auto;
   padding:1rem;
   display:grid;
@@ -51,6 +56,7 @@ header p{margin:0;color:#cbd5e1;font-size:.9rem}
   border:1px solid var(--border);
   border-radius:20px;
   padding:1rem;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
 .grid{display:grid;gap:1rem}
 .grid-2{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
@@ -114,6 +120,7 @@ button.danger{background:var(--danger)}
 }
 small{color:var(--muted)}
 .hidden{display:none}
+
 #auth{
   position:fixed;
   inset:0;
@@ -144,6 +151,7 @@ small{color:var(--muted)}
   z-index:200;
 }
 canvas{max-width:100%}
+
 @media(max-width:600px){
   #timer{font-size:3rem}
   header{flex-direction:column;align-items:flex-start;gap:.5rem}
@@ -152,6 +160,7 @@ canvas{max-width:100%}
 </head>
 <body>
 
+<!-- Login / Create Account -->
 <div id="auth">
   <div id="authBox">
     <h2 id="authTitle">Login</h2>
@@ -189,6 +198,7 @@ canvas{max-width:100%}
   </div>
 </div>
 
+<!-- Header -->
 <header>
   <div>
     <h1>🔥 FocusForgeIQ</h1>
@@ -203,11 +213,13 @@ canvas{max-width:100%}
 
 <div class="container">
 
+  <!-- Welcome -->
   <section class="card">
     <h2>Welcome to FocusForgeIQ</h2>
     <p id="todayDate"></p>
   </section>
 
+  <!-- Stats -->
   <section class="grid grid-4">
     <div class="stat"><span id="streakStat">0</span>Streak</div>
     <div class="stat"><span id="sessionStat">0</span>Pomodoros</div>
@@ -215,6 +227,7 @@ canvas{max-width:100%}
     <div class="stat"><span id="examStat">0</span>Exams</div>
   </section>
 
+  <!-- Custom Pomodoro -->
   <section class="card">
     <h2>⏳ Ultra Pomodoro (Custom Time)</h2>
 
@@ -241,31 +254,89 @@ canvas{max-width:100%}
     </div>
   </section>
 
+  <!-- Notes -->
   <section class="card">
     <h2>📝 Smart Notes</h2>
     <textarea id="notes" rows="6" placeholder="Write your notes here..."></textarea>
+
     <div class="row" style="margin-top:.5rem">
       <button onclick="saveNotes()">Save Notes</button>
       <button onclick="exportNotes()">Export Notes</button>
     </div>
   </section>
-
+    <!-- Study Streak -->
   <section class="card">
     <h2>🔥 Study Streak</h2>
     <p id="streakDisplay" style="font-size:2rem;font-weight:700">0 Days</p>
     <button onclick="markStudy()">I Studied Today</button>
   </section>
 
+  <!-- Tasks -->
+  <section class="card">
+    <h2>✅ Tasks</h2>
+
+    <div class="row">
+      <input id="taskInput" placeholder="Task title">
+      <button onclick="addTask()">Add Task</button>
+    </div>
+
+    <div id="taskList"></div>
+  </section>
+
+  <!-- Exam Countdown -->
+  <section class="card">
+    <h2>📅 Exam Countdown</h2>
+
+    <div class="grid grid-2">
+      <input id="examName" placeholder="Exam name">
+      <input id="examDate" type="date">
+    </div>
+
+    <div style="height:.5rem"></div>
+
+    <button onclick="addExam()">Add Exam</button>
+
+    <div id="examList"></div>
+  </section>
+
+  <!-- SGPA Calculator -->
+  <section class="card">
+    <h2>🎓 SGPA Calculator</h2>
+
+    <div class="grid grid-2">
+      <input id="subName" placeholder="Subject">
+      <input id="credits" type="number" placeholder="Credits">
+
+      <select id="grade">
+        <option value="10">O (10)</option>
+        <option value="9">A+ (9)</option>
+        <option value="8">A (8)</option>
+        <option value="7">B+ (7)</option>
+        <option value="6">B (6)</option>
+      </select>
+
+      <button onclick="addSubject()">Add Subject</button>
+    </div>
+
+    <div id="sgpaList"></div>
+
+    <h3 id="sgpaResult">SGPA: 0.00</h3>
+  </section>
+
+  <!-- Weekly Analytics -->
   <section class="card">
     <h2>📊 Weekly Analytics</h2>
+
     <canvas id="analyticsChart" height="120"></canvas>
   </section>
 
 </div>
 
+<!-- Toast -->
 <div id="toast"></div>
 
 <script>
+  // ===== Helpers =====
 const $ = id => document.getElementById(id);
 
 function toast(msg){
@@ -275,24 +346,29 @@ function toast(msg){
   setTimeout(() => t.style.display = 'none', 2500);
 }
 
-$('todayDate').textContent = new Date().toLocaleDateString('en-IN',{
-  weekday:'long',
-  day:'numeric',
-  month:'long',
-  year:'numeric'
-});
+// ===== Date =====
+function updateDate(){
+  $('todayDate').textContent = new Date().toLocaleDateString('en-IN',{
+    weekday:'long',
+    day:'numeric',
+    month:'long',
+    year:'numeric'
+  });
+}
+updateDate();
+setInterval(updateDate,60000);
 
+// ===== Theme =====
 if(localStorage.getItem('ffi_theme') === 'dark'){
   document.documentElement.classList.add('dark');
 }
-
 $('themeBtn').onclick = () => {
   document.documentElement.classList.toggle('dark');
   localStorage.setItem('ffi_theme',
     document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 };
 
-// Password show/hide
+// ===== Password Show / Hide =====
 const pwdInput = $('password');
 const togglePwd = $('togglePassword');
 
@@ -306,7 +382,7 @@ togglePwd.onclick = () => {
   }
 };
 
-// Demo user
+// ===== Demo User =====
 (function(){
   const users = JSON.parse(localStorage.getItem('ffi_users') || '{}');
   if(!users['demo@focusforgeiq.com']){
@@ -317,6 +393,7 @@ togglePwd.onclick = () => {
 
 let loginMode = true;
 
+// ===== Auth =====
 function showApp(email){
   $('auth').style.display = 'none';
   $('logoutBtn').classList.remove('hidden');
@@ -324,6 +401,7 @@ function showApp(email){
   localStorage.setItem('ffi_logged_in','true');
   localStorage.setItem('ffi_user_email',email);
 
+  refreshAnalyticsChart();
   toast('Welcome ' + email);
 }
 
@@ -355,7 +433,6 @@ $('authBtn').onclick = () => {
 
     if(users[email] && users[email].password === password){
       showApp(email);
-      refreshAnalyticsChart();
     } else {
       toast('Invalid credentials');
     }
@@ -393,7 +470,7 @@ $('logoutBtn').onclick = () => {
   location.reload();
 };
 
-// Custom Pomodoro
+// ===== Custom Pomodoro =====
 let studyMinutes = parseInt(localStorage.getItem('ffi_study') || '25');
 let breakMinutes = parseInt(localStorage.getItem('ffi_break') || '5');
 
@@ -508,7 +585,7 @@ function resetTimer(){
 renderTimer();
 $('sessionStat').textContent = localStorage.getItem('ffi_sessions') || '0';
 
-// Notes
+// ===== Notes =====
 $('notes').value = localStorage.getItem('ffi_notes') || '';
 
 function saveNotes(){
@@ -531,7 +608,7 @@ $('notes').addEventListener('input',() => {
   },2000);
 });
 
-// Streak
+// ===== Streak =====
 function today(){ return new Date().toISOString().split('T')[0]; }
 
 let streak = JSON.parse(localStorage.getItem('ffi_streak') ||
@@ -567,7 +644,174 @@ function markStudy(){
 
 renderStreak();
 
-// Analytics fixed
+// ===== Tasks =====
+let tasks = JSON.parse(localStorage.getItem('ffi_tasks') || '[]');
+
+function renderTasks(){
+
+  $('taskList').innerHTML = '';
+
+  tasks.forEach((t,i) => {
+
+    const div = document.createElement('div');
+    div.className = 'item';
+
+    div.innerHTML = `
+      <span style="${t.done ? 'text-decoration:line-through' : ''}">${t.title}</span>
+      <div class="row">
+        <button onclick="toggleTask(${i})">${t.done ? 'Undo' : 'Done'}</button>
+        <button class="danger" onclick="deleteTask(${i})">Delete</button>
+      </div>`;
+
+    $('taskList').appendChild(div);
+  });
+
+  $('taskStat').textContent = tasks.length;
+}
+
+function addTask(){
+
+  const title = $('taskInput').value.trim();
+
+  if(!title) return;
+
+  tasks.push({title,done:false});
+
+  localStorage.setItem('ffi_tasks',JSON.stringify(tasks));
+
+  $('taskInput').value = '';
+
+  renderTasks();
+}
+
+function toggleTask(i){
+  tasks[i].done = !tasks[i].done;
+  localStorage.setItem('ffi_tasks',JSON.stringify(tasks));
+  renderTasks();
+}
+
+function deleteTask(i){
+  tasks.splice(i,1);
+  localStorage.setItem('ffi_tasks',JSON.stringify(tasks));
+  renderTasks();
+}
+
+renderTasks();
+
+// ===== Exams =====
+let exams = JSON.parse(localStorage.getItem('ffi_exams') || '[]');
+
+function renderExams(){
+
+  $('examList').innerHTML = '';
+
+  exams.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  exams.forEach((e,i) => {
+
+    const days = Math.ceil((new Date(e.date) - new Date(today())) / 86400000);
+
+    const div = document.createElement('div');
+    div.className = 'item';
+
+    div.innerHTML = `
+      <div>
+        <strong>${e.name}</strong><br>
+        <small>${e.date} • ${days} days left</small>
+      </div>
+      <button class="danger" onclick="removeExam(${i})">Delete</button>`;
+
+    $('examList').appendChild(div);
+  });
+
+  $('examStat').textContent = exams.length;
+}
+
+function addExam(){
+
+  const name = $('examName').value.trim();
+  const date = $('examDate').value;
+
+  if(!name || !date) return;
+
+  exams.push({name,date});
+
+  localStorage.setItem('ffi_exams',JSON.stringify(exams));
+
+  $('examName').value = '';
+  $('examDate').value = '';
+
+  renderExams();
+}
+
+function removeExam(i){
+  exams.splice(i,1);
+  localStorage.setItem('ffi_exams',JSON.stringify(exams));
+  renderExams();
+}
+
+renderExams();
+
+// ===== SGPA =====
+let subjects = JSON.parse(localStorage.getItem('ffi_subjects') || '[]');
+
+function renderSubjects(){
+
+  $('sgpaList').innerHTML = '';
+
+  let tc = 0;
+  let tp = 0;
+
+  subjects.forEach((s,i) => {
+
+    tc += s.credits;
+    tp += s.credits * s.grade;
+
+    const div = document.createElement('div');
+    div.className = 'item';
+
+    div.innerHTML = `
+      <div>
+        <strong>${s.name}</strong><br>
+        <small>Credits: ${s.credits} | Grade: ${s.grade}</small>
+      </div>
+      <button class="danger" onclick="removeSubject(${i})">Delete</button>`;
+
+    $('sgpaList').appendChild(div);
+  });
+
+  const sgpa = tc ? (tp/tc).toFixed(2) : '0.00';
+
+  $('sgpaResult').textContent = 'SGPA: ' + sgpa;
+}
+
+function addSubject(){
+
+  const name = $('subName').value.trim();
+  const credits = parseFloat($('credits').value);
+  const grade = parseFloat($('grade').value);
+
+  if(!name || isNaN(credits)) return;
+
+  subjects.push({name,credits,grade});
+
+  localStorage.setItem('ffi_subjects',JSON.stringify(subjects));
+
+  $('subName').value = '';
+  $('credits').value = '';
+
+  renderSubjects();
+}
+
+function removeSubject(i){
+  subjects.splice(i,1);
+  localStorage.setItem('ffi_subjects',JSON.stringify(subjects));
+  renderSubjects();
+}
+
+renderSubjects();
+
+// ===== Analytics =====
 function getWeeklyStudyData(){
 
   const user = localStorage.getItem('ffi_user_email') || 'guest';
