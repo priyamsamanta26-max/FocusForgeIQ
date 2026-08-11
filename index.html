@@ -13,7 +13,6 @@
   --muted:#64748b;
   --border:#e2e8f0;
   --primary:#2563eb;
-  --success:#16a34a;
   --danger:#dc2626;
 }
 .dark{
@@ -37,14 +36,11 @@ header{
   padding:1rem;
   background:#0f172a;
   color:#fff;
-  position:sticky;
-  top:0;
-  z-index:10;
 }
 header h1{margin:0}
 header p{margin:0;color:#cbd5e1;font-size:.9rem}
 .container{
-  max-width:1200px;
+  max-width:1100px;
   margin:auto;
   padding:1rem;
   display:grid;
@@ -55,7 +51,6 @@ header p{margin:0;color:#cbd5e1;font-size:.9rem}
   border:1px solid var(--border);
   border-radius:20px;
   padding:1rem;
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
 .grid{display:grid;gap:1rem}
 .grid-2{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
@@ -118,6 +113,25 @@ button.danger{background:var(--danger)}
   margin-top:.5rem;
 }
 small{color:var(--muted)}
+.hidden{display:none}
+#auth{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1rem;
+  z-index:100;
+}
+#authBox{
+  width:100%;
+  max-width:380px;
+  background:#fff;
+  color:#000;
+  border-radius:24px;
+  padding:2rem;
+}
 #toast{
   position:fixed;
   right:1rem;
@@ -127,11 +141,9 @@ small{color:var(--muted)}
   padding:.9rem 1rem;
   border-radius:12px;
   display:none;
-  z-index:100;
+  z-index:200;
 }
-canvas{
-  max-width:100%;
-}
+canvas{max-width:100%}
 @media(max-width:600px){
   #timer{font-size:3rem}
   header{flex-direction:column;align-items:flex-start;gap:.5rem}
@@ -140,12 +152,53 @@ canvas{
 </head>
 <body>
 
+<div id="auth">
+  <div id="authBox">
+    <h2 id="authTitle">Login</h2>
+
+    <input id="email" type="email" placeholder="Email">
+
+    <div style="height:.7rem"></div>
+
+    <div style="position:relative">
+      <input id="password" type="password" placeholder="Password"
+             style="padding-right:90px">
+
+      <button type="button" id="togglePassword"
+              style="position:absolute;right:8px;top:50%;
+                     transform:translateY(-50%);
+                     background:#334155;color:white;border:none;
+                     border-radius:8px;padding:.35rem .6rem;
+                     cursor:pointer;font-size:.8rem">
+        Show
+      </button>
+    </div>
+
+    <div style="height:1rem"></div>
+
+    <button id="authBtn" style="width:100%">Login</button>
+
+    <p style="text-align:center;margin-top:1rem">
+      <span id="switchText">Don't have an account?</span>
+      <a href="#" id="switchMode">Create Account</a>
+    </p>
+
+    <p style="text-align:center;font-size:.9rem;color:#64748b">
+      Demo: demo@focusforgeiq.com / 123456
+    </p>
+  </div>
+</div>
+
 <header>
   <div>
     <h1>🔥 FocusForgeIQ</h1>
     <p>Forge your focus. Power your intelligence.</p>
   </div>
-  <button id="themeBtn" class="secondary">🌙 Theme</button>
+
+  <div class="row">
+    <button id="themeBtn" class="secondary">🌙 Theme</button>
+    <button id="logoutBtn" class="danger hidden">Logout</button>
+  </div>
 </header>
 
 <div class="container">
@@ -204,44 +257,6 @@ canvas{
   </section>
 
   <section class="card">
-    <h2>✅ Tasks</h2>
-    <div class="row">
-      <input id="taskInput" placeholder="Task title">
-      <button onclick="addTask()">Add Task</button>
-    </div>
-    <div id="taskList"></div>
-  </section>
-
-  <section class="card">
-    <h2>📅 Exam Countdown</h2>
-    <div class="grid grid-2">
-      <input id="examName" placeholder="Exam name">
-      <input id="examDate" type="date">
-    </div>
-    <div style="height:.5rem"></div>
-    <button onclick="addExam()">Add Exam</button>
-    <div id="examList"></div>
-  </section>
-
-  <section class="card">
-    <h2>🎓 SGPA Calculator</h2>
-    <div class="grid grid-2">
-      <input id="subName" placeholder="Subject">
-      <input id="credits" type="number" placeholder="Credits">
-      <select id="grade">
-        <option value="10">O (10)</option>
-        <option value="9">A+ (9)</option>
-        <option value="8">A (8)</option>
-        <option value="7">B+ (7)</option>
-        <option value="6">B (6)</option>
-      </select>
-      <button onclick="addSubject()">Add Subject</button>
-    </div>
-    <div id="sgpaList"></div>
-    <h3 id="sgpaResult">SGPA: 0.00</h3>
-  </section>
-
-  <section class="card">
     <h2>📊 Weekly Analytics</h2>
     <canvas id="analyticsChart" height="120"></canvas>
   </section>
@@ -251,7 +266,6 @@ canvas{
 <div id="toast"></div>
 
 <script>
-// ===== Helpers =====
 const $ = id => document.getElementById(id);
 
 function toast(msg){
@@ -261,29 +275,125 @@ function toast(msg){
   setTimeout(() => t.style.display = 'none', 2500);
 }
 
-// ===== Date =====
-function updateDate(){
-  $('todayDate').textContent = new Date().toLocaleDateString('en-IN',{
-    weekday:'long',
-    day:'numeric',
-    month:'long',
-    year:'numeric'
-  });
-}
-updateDate();
-setInterval(updateDate, 60000);
+$('todayDate').textContent = new Date().toLocaleDateString('en-IN',{
+  weekday:'long',
+  day:'numeric',
+  month:'long',
+  year:'numeric'
+});
 
-// ===== Theme =====
 if(localStorage.getItem('ffi_theme') === 'dark'){
   document.documentElement.classList.add('dark');
 }
+
 $('themeBtn').onclick = () => {
   document.documentElement.classList.toggle('dark');
   localStorage.setItem('ffi_theme',
     document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 };
 
-// ===== Custom Pomodoro =====
+// Password show/hide
+const pwdInput = $('password');
+const togglePwd = $('togglePassword');
+
+togglePwd.onclick = () => {
+  if (pwdInput.type === 'password') {
+    pwdInput.type = 'text';
+    togglePwd.textContent = 'Hide';
+  } else {
+    pwdInput.type = 'password';
+    togglePwd.textContent = 'Show';
+  }
+};
+
+// Demo user
+(function(){
+  const users = JSON.parse(localStorage.getItem('ffi_users') || '{}');
+  if(!users['demo@focusforgeiq.com']){
+    users['demo@focusforgeiq.com'] = {password:'123456'};
+    localStorage.setItem('ffi_users', JSON.stringify(users));
+  }
+})();
+
+let loginMode = true;
+
+function showApp(email){
+  $('auth').style.display = 'none';
+  $('logoutBtn').classList.remove('hidden');
+
+  localStorage.setItem('ffi_logged_in','true');
+  localStorage.setItem('ffi_user_email',email);
+
+  toast('Welcome ' + email);
+}
+
+$('switchMode').onclick = (e) => {
+  e.preventDefault();
+
+  loginMode = !loginMode;
+
+  $('authTitle').textContent = loginMode ? 'Login' : 'Create Account';
+  $('authBtn').textContent = loginMode ? 'Login' : 'Create Account';
+  $('switchText').textContent = loginMode ?
+    "Don't have an account?" : 'Already have an account?';
+  $('switchMode').textContent = loginMode ? 'Create Account' : 'Login';
+};
+
+$('authBtn').onclick = () => {
+
+  const email = $('email').value.trim().toLowerCase();
+  const password = $('password').value;
+
+  let users = JSON.parse(localStorage.getItem('ffi_users') || '{}');
+
+  if(!email || !password){
+    toast('Enter email and password');
+    return;
+  }
+
+  if(loginMode){
+
+    if(users[email] && users[email].password === password){
+      showApp(email);
+      refreshAnalyticsChart();
+    } else {
+      toast('Invalid credentials');
+    }
+
+  } else {
+
+    if(users[email]){
+      toast('Account already exists');
+      return;
+    }
+
+    users[email] = {password};
+    localStorage.setItem('ffi_users', JSON.stringify(users));
+
+    toast('Account created. Please login.');
+
+    loginMode = true;
+    $('authTitle').textContent = 'Login';
+    $('authBtn').textContent = 'Login';
+  }
+};
+
+window.addEventListener('load', () => {
+  const remembered = localStorage.getItem('ffi_logged_in');
+  const email = localStorage.getItem('ffi_user_email');
+
+  if(remembered === 'true' && email){
+    showApp(email);
+  }
+});
+
+$('logoutBtn').onclick = () => {
+  localStorage.removeItem('ffi_logged_in');
+  localStorage.removeItem('ffi_user_email');
+  location.reload();
+};
+
+// Custom Pomodoro
 let studyMinutes = parseInt(localStorage.getItem('ffi_study') || '25');
 let breakMinutes = parseInt(localStorage.getItem('ffi_break') || '5');
 
@@ -302,6 +412,7 @@ function renderTimer(){
 }
 
 function applyCustomTime(){
+
   const study = parseInt($('studyInput').value);
   const brk = parseInt($('breakInput').value);
 
@@ -309,6 +420,7 @@ function applyCustomTime(){
     toast('Study time must be 1-300 minutes');
     return;
   }
+
   if(isNaN(brk) || brk < 1 || brk > 120){
     toast('Break time must be 1-120 minutes');
     return;
@@ -317,53 +429,68 @@ function applyCustomTime(){
   studyMinutes = study;
   breakMinutes = brk;
 
-  localStorage.setItem('ffi_study', studyMinutes);
-  localStorage.setItem('ffi_break', breakMinutes);
+  localStorage.setItem('ffi_study',studyMinutes);
+  localStorage.setItem('ffi_break',breakMinutes);
 
   pauseTimer();
+
   isBreak = false;
   currentMinutes = studyMinutes;
   timeLeft = currentMinutes * 60;
+
   $('timerMode').textContent = 'Mode: Study';
+
   renderTimer();
 
   toast(`Timer set: ${studyMinutes}m study / ${breakMinutes}m break`);
 }
 
 function startTimer(){
+
   if(timerId) return;
 
   timerId = setInterval(() => {
+
     timeLeft--;
     renderTimer();
 
     if(timeLeft <= 0){
+
       clearInterval(timerId);
       timerId = null;
 
       if(!isBreak){
+
         let sessions = parseInt(localStorage.getItem('ffi_sessions') || '0') + 1;
-        localStorage.setItem('ffi_sessions', sessions);
+        localStorage.setItem('ffi_sessions',sessions);
         $('sessionStat').textContent = sessions;
+
+        updateTodayStudy(studyMinutes);
+        refreshAnalyticsChart();
 
         toast('Study session completed! Break started.');
 
         isBreak = true;
         currentMinutes = breakMinutes;
         timeLeft = currentMinutes * 60;
+
         $('timerMode').textContent = 'Mode: Break';
-      }else{
+
+      } else {
+
         toast('Break completed! Study session ready.');
 
         isBreak = false;
         currentMinutes = studyMinutes;
         timeLeft = currentMinutes * 60;
+
         $('timerMode').textContent = 'Mode: Study';
       }
 
       renderTimer();
     }
-  }, 1000);
+
+  },1000);
 }
 
 function pauseTimer(){
@@ -381,30 +508,30 @@ function resetTimer(){
 renderTimer();
 $('sessionStat').textContent = localStorage.getItem('ffi_sessions') || '0';
 
-// ===== Notes =====
+// Notes
 $('notes').value = localStorage.getItem('ffi_notes') || '';
 
 function saveNotes(){
-  localStorage.setItem('ffi_notes', $('notes').value);
+  localStorage.setItem('ffi_notes',$('notes').value);
   toast('Notes saved');
 }
 
 function exportNotes(){
-  const blob = new Blob([$('notes').value], {type:'text/plain'});
+  const blob = new Blob([$('notes').value],{type:'text/plain'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'FocusForgeIQ_Notes.txt';
   a.click();
 }
 
-$('notes').addEventListener('input', () => {
+$('notes').addEventListener('input',() => {
   clearTimeout(window.noteTimer);
   window.noteTimer = setTimeout(() => {
-    localStorage.setItem('ffi_notes', $('notes').value);
-  }, 2000);
+    localStorage.setItem('ffi_notes',$('notes').value);
+  },2000);
 });
 
-// ===== Streak =====
+// Streak
 function today(){ return new Date().toISOString().split('T')[0]; }
 
 let streak = JSON.parse(localStorage.getItem('ffi_streak') ||
@@ -417,190 +544,98 @@ function renderStreak(){
 }
 
 function markStudy(){
+
   if(streak.last === today()){
     toast('Already marked today');
     return;
   }
 
   const y = new Date();
-  y.setDate(y.getDate() - 1);
+  y.setDate(y.getDate()-1);
+
   const ys = y.toISOString().split('T')[0];
 
   streak.count = streak.last === ys ? streak.count + 1 : 1;
   streak.last = today();
 
-  localStorage.setItem('ffi_streak', JSON.stringify(streak));
+  localStorage.setItem('ffi_streak',JSON.stringify(streak));
+
   renderStreak();
+
   toast('Streak updated 🔥');
 }
 
 renderStreak();
 
-// ===== Tasks =====
-let tasks = JSON.parse(localStorage.getItem('ffi_tasks') || '[]');
+// Analytics fixed
+function getWeeklyStudyData(){
 
-function renderTasks(){
-  $('taskList').innerHTML = '';
+  const user = localStorage.getItem('ffi_user_email') || 'guest';
+  const key = 'ffi_weekly_' + user;
 
-  tasks.forEach((t,i) => {
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.innerHTML = `
-      <span style="${t.done ? 'text-decoration:line-through' : ''}">${t.title}</span>
-      <div class="row">
-        <button onclick="toggleTask(${i})">${t.done ? 'Undo' : 'Done'}</button>
-        <button class="danger" onclick="deleteTask(${i})">Delete</button>
-      </div>`;
-    $('taskList').appendChild(div);
-  });
+  if(!localStorage.getItem(key)){
 
-  $('taskStat').textContent = tasks.length;
+    const emptyWeek = {
+      Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0,Sun:0
+    };
+
+    localStorage.setItem(key,JSON.stringify(emptyWeek));
+  }
+
+  return JSON.parse(localStorage.getItem(key));
 }
 
-function addTask(){
-  const title = $('taskInput').value.trim();
-  if(!title) return;
+function updateTodayStudy(minutes){
 
-  tasks.push({title, done:false});
-  localStorage.setItem('ffi_tasks', JSON.stringify(tasks));
+  const user = localStorage.getItem('ffi_user_email') || 'guest';
+  const key = 'ffi_weekly_' + user;
 
-  $('taskInput').value = '';
-  renderTasks();
+  const data = getWeeklyStudyData();
+
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const todayName = days[new Date().getDay()];
+
+  data[todayName] += minutes / 60;
+
+  localStorage.setItem(key,JSON.stringify(data));
 }
 
-function toggleTask(i){
-  tasks[i].done = !tasks[i].done;
-  localStorage.setItem('ffi_tasks', JSON.stringify(tasks));
-  renderTasks();
-}
+const ctx = $('analyticsChart');
 
-function deleteTask(i){
-  tasks.splice(i,1);
-  localStorage.setItem('ffi_tasks', JSON.stringify(tasks));
-  renderTasks();
-}
-
-renderTasks();
-
-// ===== Exams =====
-let exams = JSON.parse(localStorage.getItem('ffi_exams') || '[]');
-
-function renderExams(){
-  $('examList').innerHTML = '';
-
-  exams.sort((a,b) => new Date(a.date) - new Date(b.date));
-
-  exams.forEach((e,i) => {
-    const days = Math.ceil((new Date(e.date) - new Date(today())) / 86400000);
-
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.innerHTML = `
-      <div>
-        <strong>${e.name}</strong><br>
-        <small>${e.date} • ${days} days left</small>
-      </div>
-      <button class="danger" onclick="removeExam(${i})">Delete</button>`;
-
-    $('examList').appendChild(div);
-  });
-
-  $('examStat').textContent = exams.length;
-}
-
-function addExam(){
-  const name = $('examName').value.trim();
-  const date = $('examDate').value;
-
-  if(!name || !date) return;
-
-  exams.push({name,date});
-  localStorage.setItem('ffi_exams', JSON.stringify(exams));
-
-  $('examName').value = '';
-  $('examDate').value = '';
-
-  renderExams();
-}
-
-function removeExam(i){
-  exams.splice(i,1);
-  localStorage.setItem('ffi_exams', JSON.stringify(exams));
-  renderExams();
-}
-
-renderExams();
-
-// ===== SGPA =====
-let subjects = JSON.parse(localStorage.getItem('ffi_subjects') || '[]');
-
-function renderSubjects(){
-  $('sgpaList').innerHTML = '';
-
-  let tc = 0, tp = 0;
-
-  subjects.forEach((s,i) => {
-    tc += s.credits;
-    tp += s.credits * s.grade;
-
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.innerHTML = `
-      <div>
-        <strong>${s.name}</strong><br>
-        <small>Credits: ${s.credits} | Grade: ${s.grade}</small>
-      </div>
-      <button class="danger" onclick="removeSubject(${i})">Delete</button>`;
-
-    $('sgpaList').appendChild(div);
-  });
-
-  const sgpa = tc ? (tp/tc).toFixed(2) : '0.00';
-  $('sgpaResult').textContent = 'SGPA: ' + sgpa;
-}
-
-function addSubject(){
-  const name = $('subName').value.trim();
-  const credits = parseFloat($('credits').value);
-  const grade = parseFloat($('grade').value);
-
-  if(!name || isNaN(credits)) return;
-
-  subjects.push({name,credits,grade});
-  localStorage.setItem('ffi_subjects', JSON.stringify(subjects));
-
-  $('subName').value = '';
-  $('credits').value = '';
-
-  renderSubjects();
-}
-
-function removeSubject(i){
-  subjects.splice(i,1);
-  localStorage.setItem('ffi_subjects', JSON.stringify(subjects));
-  renderSubjects();
-}
-
-renderSubjects();
-
-// ===== Analytics Chart =====
-const ctx = document.getElementById('analyticsChart');
-
-new Chart(ctx, {
+window.analyticsChart = new Chart(ctx,{
   type:'bar',
   data:{
     labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
     datasets:[{
       label:'Study Hours',
-      data:[1,2,1.5,3,2.5,4,2],
+      data:[0,0,0,0,0,0,0],
       borderWidth:1
     }]
   },
   options:{
     responsive:true,
-    maintainAspectRatio:true
+    scales:{
+      y:{
+        beginAtZero:true,
+        ticks:{stepSize:1}
+      }
+    }
   }
 });
+
+function refreshAnalyticsChart(){
+
+  const data = getWeeklyStudyData();
+
+  analyticsChart.data.datasets[0].data = [
+    data.Mon,data.Tue,data.Wed,
+    data.Thu,data.Fri,data.Sat,data.Sun
+  ];
+
+  analyticsChart.update();
+}
+
+refreshAnalyticsChart();
 </script>
 </body>
 </html>
