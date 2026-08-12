@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FocusForgeIQ - Ultra Advanced</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- IMPORT SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root{
@@ -166,13 +168,9 @@ canvas{max-width:100%}
     <h2 id="authTitle">Login</h2>
 
     <input id="email" type="email" placeholder="Email">
-
     <div style="height:.7rem"></div>
-
     <div style="position:relative">
-      <input id="password" type="password" placeholder="Password"
-             style="padding-right:90px">
-
+      <input id="password" type="password" placeholder="Password" style="padding-right:90px">
       <button type="button" id="togglePassword"
               style="position:absolute;right:8px;top:50%;
                      transform:translateY(-50%);
@@ -182,18 +180,12 @@ canvas{max-width:100%}
         Show
       </button>
     </div>
-
     <div style="height:1rem"></div>
-
     <button id="authBtn" style="width:100%">Login</button>
 
     <p style="text-align:center;margin-top:1rem">
       <span id="switchText">Don't have an account?</span>
       <a href="#" id="switchMode">Create Account</a>
-    </p>
-
-    <p style="text-align:center;font-size:.9rem;color:#64748b">
-      Demo: demo@focusforgeiq.com / 123456
     </p>
   </div>
 </div>
@@ -204,7 +196,6 @@ canvas{max-width:100%}
     <h1>🔥 FocusForgeIQ</h1>
     <p>Forge your focus. Power your intelligence.</p>
   </div>
-
   <div class="row">
     <button id="themeBtn" class="secondary">🌙 Theme</button>
     <button id="logoutBtn" class="danger hidden">Logout</button>
@@ -212,7 +203,6 @@ canvas{max-width:100%}
 </header>
 
 <div class="container">
-
   <!-- Welcome -->
   <section class="card">
     <h2>Welcome to FocusForgeIQ</h2>
@@ -230,22 +220,18 @@ canvas{max-width:100%}
   <!-- Custom Pomodoro -->
   <section class="card">
     <h2>⏳ Ultra Pomodoro (Custom Time)</h2>
-
     <div id="timer">25:00</div>
     <p id="timerMode">Mode: Study</p>
-
     <div class="grid grid-2">
       <div>
         <label>Study Minutes</label>
         <input id="studyInput" type="number" min="1" max="300" value="25">
       </div>
-
       <div>
         <label>Break Minutes</label>
         <input id="breakInput" type="number" min="1" max="120" value="5">
       </div>
     </div>
-
     <div class="row" style="margin-top:1rem">
       <button onclick="applyCustomTime()">Apply Time</button>
       <button onclick="startTimer()">Start</button>
@@ -258,13 +244,13 @@ canvas{max-width:100%}
   <section class="card">
     <h2>📝 Smart Notes</h2>
     <textarea id="notes" rows="6" placeholder="Write your notes here..."></textarea>
-
     <div class="row" style="margin-top:.5rem">
-      <button onclick="saveNotes()">Save Notes</button>
+      <button onclick="saveNotes()">Save Notes to Cloud</button>
       <button onclick="exportNotes()">Export Notes</button>
     </div>
   </section>
-    <!-- Study Streak -->
+  
+  <!-- Study Streak -->
   <section class="card">
     <h2>🔥 Study Streak</h2>
     <p id="streakDisplay" style="font-size:2rem;font-weight:700">0 Days</p>
@@ -274,39 +260,31 @@ canvas{max-width:100%}
   <!-- Tasks -->
   <section class="card">
     <h2>✅ Tasks</h2>
-
     <div class="row">
       <input id="taskInput" placeholder="Task title">
       <button onclick="addTask()">Add Task</button>
     </div>
-
     <div id="taskList"></div>
   </section>
 
   <!-- Exam Countdown -->
   <section class="card">
     <h2>📅 Exam Countdown</h2>
-
     <div class="grid grid-2">
       <input id="examName" placeholder="Exam name">
       <input id="examDate" type="date">
     </div>
-
     <div style="height:.5rem"></div>
-
     <button onclick="addExam()">Add Exam</button>
-
     <div id="examList"></div>
   </section>
 
   <!-- SGPA Calculator -->
   <section class="card">
     <h2>🎓 SGPA Calculator</h2>
-
     <div class="grid grid-2">
       <input id="subName" placeholder="Subject">
       <input id="credits" type="number" placeholder="Credits">
-
       <select id="grade">
         <option value="10">O (10)</option>
         <option value="9">A+ (9)</option>
@@ -314,29 +292,39 @@ canvas{max-width:100%}
         <option value="7">B+ (7)</option>
         <option value="6">B (6)</option>
       </select>
-
       <button onclick="addSubject()">Add Subject</button>
     </div>
-
     <div id="sgpaList"></div>
-
     <h3 id="sgpaResult">SGPA: 0.00</h3>
   </section>
 
   <!-- Weekly Analytics -->
   <section class="card">
     <h2>📊 Weekly Analytics</h2>
-
     <canvas id="analyticsChart" height="120"></canvas>
   </section>
-
 </div>
 
 <!-- Toast -->
 <div id="toast"></div>
 
 <script>
-  // ===== Helpers =====
+// ==========================================
+// 1. SUPABASE INITIALIZATION
+// ==========================================
+// PASTE YOUR KEYS HERE
+const supabaseUrl = 'https://juriwtylcaamkiqdpmyn.supabase.co/rest/v1/';
+const supabaseAnonKey = 'sb_publishable_VEVD_JdRHLpx4U0nik-Z9A_eAoof89b';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+let currentUser = null;
+let tasks = [];
+let exams = [];
+let currentNoteId = null;
+
+// ==========================================
+// 2. HELPERS & UI
+// ==========================================
 const $ = id => document.getElementById(id);
 
 function toast(msg){
@@ -346,32 +334,24 @@ function toast(msg){
   setTimeout(() => t.style.display = 'none', 2500);
 }
 
-// ===== Date =====
 function updateDate(){
   $('todayDate').textContent = new Date().toLocaleDateString('en-IN',{
-    weekday:'long',
-    day:'numeric',
-    month:'long',
-    year:'numeric'
+    weekday:'long', day:'numeric', month:'long', year:'numeric'
   });
 }
 updateDate();
 setInterval(updateDate,60000);
 
-// ===== Theme =====
 if(localStorage.getItem('ffi_theme') === 'dark'){
   document.documentElement.classList.add('dark');
 }
 $('themeBtn').onclick = () => {
   document.documentElement.classList.toggle('dark');
-  localStorage.setItem('ffi_theme',
-    document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  localStorage.setItem('ffi_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 };
 
-// ===== Password Show / Hide =====
 const pwdInput = $('password');
 const togglePwd = $('togglePassword');
-
 togglePwd.onclick = () => {
   if (pwdInput.type === 'password') {
     pwdInput.type = 'text';
@@ -382,101 +362,235 @@ togglePwd.onclick = () => {
   }
 };
 
-// ===== Demo User =====
-(function(){
-  const users = JSON.parse(localStorage.getItem('ffi_users') || '{}');
-  if(!users['demo@focusforgeiq.com']){
-    users['demo@focusforgeiq.com'] = {password:'123456'};
-    localStorage.setItem('ffi_users', JSON.stringify(users));
-  }
-})();
-
+// ==========================================
+// 3. AUTHENTICATION (SUPABASE)
+// ==========================================
 let loginMode = true;
 
-// ===== Auth =====
-function showApp(email){
+async function loadUserData() {
+  await fetchTasks();
+  await fetchExams();
+  await fetchNotes();
+  renderSubjects(); // SGPA is still local
+  refreshAnalyticsChart(); // Analytics still local
+}
+
+async function showApp(user){
+  currentUser = user;
   $('auth').style.display = 'none';
   $('logoutBtn').classList.remove('hidden');
-
-  localStorage.setItem('ffi_logged_in','true');
-  localStorage.setItem('ffi_user_email',email);
-
-  refreshAnalyticsChart();
-  toast('Welcome ' + email);
+  toast('Welcome ' + user.email);
+  await loadUserData();
 }
 
 $('switchMode').onclick = (e) => {
   e.preventDefault();
-
   loginMode = !loginMode;
-
   $('authTitle').textContent = loginMode ? 'Login' : 'Create Account';
   $('authBtn').textContent = loginMode ? 'Login' : 'Create Account';
-  $('switchText').textContent = loginMode ?
-    "Don't have an account?" : 'Already have an account?';
+  $('switchText').textContent = loginMode ? "Don't have an account?" : 'Already have an account?';
   $('switchMode').textContent = loginMode ? 'Create Account' : 'Login';
 };
 
-$('authBtn').onclick = () => {
-
+$('authBtn').onclick = async () => {
   const email = $('email').value.trim().toLowerCase();
   const password = $('password').value;
-
-  let users = JSON.parse(localStorage.getItem('ffi_users') || '{}');
 
   if(!email || !password){
     toast('Enter email and password');
     return;
   }
+  
+  $('authBtn').textContent = "Processing...";
 
   if(loginMode){
-
-    if(users[email] && users[email].password === password){
-      showApp(email);
-    } else {
-      toast('Invalid credentials');
-    }
-
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if(error) toast(error.message);
+    else showApp(data.user);
   } else {
-
-    if(users[email]){
-      toast('Account already exists');
-      return;
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if(error) toast(error.message);
+    else {
+      toast('Account created! You can now log in.');
+      loginMode = true;
+      $('authTitle').textContent = 'Login';
+      $('switchText').textContent = "Don't have an account?";
+      $('switchMode').textContent = 'Create Account';
     }
-
-    users[email] = {password};
-    localStorage.setItem('ffi_users', JSON.stringify(users));
-
-    toast('Account created. Please login.');
-
-    loginMode = true;
-    $('authTitle').textContent = 'Login';
-    $('authBtn').textContent = 'Login';
   }
+  $('authBtn').textContent = loginMode ? 'Login' : 'Create Account';
 };
 
-window.addEventListener('load', () => {
-  const remembered = localStorage.getItem('ffi_logged_in');
-  const email = localStorage.getItem('ffi_user_email');
-
-  if(remembered === 'true' && email){
-    showApp(email);
+window.addEventListener('load', async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    showApp(session.user);
   }
 });
 
-$('logoutBtn').onclick = () => {
-  localStorage.removeItem('ffi_logged_in');
-  localStorage.removeItem('ffi_user_email');
+$('logoutBtn').onclick = async () => {
+  await supabase.auth.signOut();
   location.reload();
 };
 
-// ===== Custom Pomodoro =====
+
+// ==========================================
+// 4. CLOUD TASKS (SUPABASE)
+// ==========================================
+async function fetchTasks() {
+  const { data, error } = await supabase.from('tasks').select('*').order('created_at', { ascending: true });
+  if (!error) {
+    tasks = data;
+    renderTasks();
+  }
+}
+
+function renderTasks(){
+  $('taskList').innerHTML = '';
+  tasks.forEach((t) => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+      <span style="${t.done ? 'text-decoration:line-through' : ''}">${t.title}</span>
+      <div class="row">
+        <button onclick="toggleTask('${t.id}', ${t.done})">${t.done ? 'Undo' : 'Done'}</button>
+        <button class="danger" onclick="deleteTask('${t.id}')">Delete</button>
+      </div>`;
+    $('taskList').appendChild(div);
+  });
+  $('taskStat').textContent = tasks.length;
+}
+
+async function addTask(){
+  const title = $('taskInput').value.trim();
+  if(!title || !currentUser) return;
+  
+  const { data, error } = await supabase.from('tasks').insert([{ title: title, user_id: currentUser.id }]).select();
+  if (!error) {
+    tasks.push(data[0]);
+    $('taskInput').value = '';
+    renderTasks();
+  }
+}
+
+async function toggleTask(id, currentState){
+  const { error } = await supabase.from('tasks').update({ done: !currentState }).eq('id', id);
+  if (!error) {
+    const taskIndex = tasks.findIndex(t => t.id === id);
+    tasks[taskIndex].done = !currentState;
+    renderTasks();
+  }
+}
+
+async function deleteTask(id){
+  const { error } = await supabase.from('tasks').delete().eq('id', id);
+  if (!error) {
+    tasks = tasks.filter(t => t.id !== id);
+    renderTasks();
+  }
+}
+
+// ==========================================
+// 5. CLOUD EXAMS (SUPABASE)
+// ==========================================
+async function fetchExams() {
+  const { data, error } = await supabase.from('exams').select('*');
+  if (!error) {
+    exams = data;
+    renderExams();
+  }
+}
+
+function renderExams(){
+  $('examList').innerHTML = '';
+  exams.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  exams.forEach((e) => {
+    const days = Math.ceil((new Date(e.date) - new Date(today())) / 86400000);
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+      <div>
+        <strong>${e.name}</strong><br>
+        <small>${e.date} • ${days} days left</small>
+      </div>
+      <button class="danger" onclick="removeExam('${e.id}')">Delete</button>`;
+    $('examList').appendChild(div);
+  });
+  $('examStat').textContent = exams.length;
+}
+
+async function addExam(){
+  const name = $('examName').value.trim();
+  const date = $('examDate').value;
+  if(!name || !date || !currentUser) return;
+
+  const { data, error } = await supabase.from('exams').insert([{ name, date, user_id: currentUser.id }]).select();
+  if (!error) {
+    exams.push(data[0]);
+    $('examName').value = '';
+    $('examDate').value = '';
+    renderExams();
+  }
+}
+
+async function removeExam(id){
+  const { error } = await supabase.from('exams').delete().eq('id', id);
+  if (!error) {
+    exams = exams.filter(e => e.id !== id);
+    renderExams();
+  }
+}
+
+// ==========================================
+// 6. CLOUD NOTES (SUPABASE)
+// ==========================================
+async function fetchNotes() {
+  const { data, error } = await supabase.from('notes').select('*').limit(1);
+  if (data && data.length > 0) {
+    $('notes').value = data[0].content;
+    currentNoteId = data[0].id;
+  } else if (!error) {
+    // Create an empty note row for new user
+    const res = await supabase.from('notes').insert([{ content: '', user_id: currentUser.id }]).select();
+    if(res.data) currentNoteId = res.data[0].id;
+  }
+}
+
+async function saveNotes(){
+  if(!currentUser || !currentNoteId) return;
+  const content = $('notes').value;
+  const { error } = await supabase.from('notes').update({ content }).eq('id', currentNoteId);
+  if(!error) toast('Notes saved to Cloud');
+  else toast('Error saving notes');
+}
+
+function exportNotes(){
+  const blob = new Blob([$('notes').value],{type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'FocusForgeIQ_Notes.txt';
+  a.click();
+}
+
+// Auto-save typing locally, manual button saves to cloud (saves DB reads/writes)
+$('notes').addEventListener('input',() => {
+  clearTimeout(window.noteTimer);
+  window.noteTimer = setTimeout(() => {
+    localStorage.setItem('ffi_notes_temp', $('notes').value);
+  }, 1000);
+});
+
+// ==========================================
+// 7. LOCAL FEATURES (Timer, Streak, SGPA)
+// ==========================================
+// (These remain in local storage for speed and offline usage)
+
+// POMODORO
 let studyMinutes = parseInt(localStorage.getItem('ffi_study') || '25');
 let breakMinutes = parseInt(localStorage.getItem('ffi_break') || '5');
-
 $('studyInput').value = studyMinutes;
 $('breakInput').value = breakMinutes;
-
 let currentMinutes = studyMinutes;
 let timeLeft = currentMinutes * 60;
 let timerId = null;
@@ -489,317 +603,114 @@ function renderTimer(){
 }
 
 function applyCustomTime(){
-
   const study = parseInt($('studyInput').value);
   const brk = parseInt($('breakInput').value);
-
-  if(isNaN(study) || study < 1 || study > 300){
-    toast('Study time must be 1-300 minutes');
-    return;
-  }
-
-  if(isNaN(brk) || brk < 1 || brk > 120){
-    toast('Break time must be 1-120 minutes');
-    return;
-  }
-
+  if(isNaN(study) || study < 1 || study > 300) return toast('Study time must be 1-300 minutes');
+  if(isNaN(brk) || brk < 1 || brk > 120) return toast('Break time must be 1-120 minutes');
+  
   studyMinutes = study;
   breakMinutes = brk;
-
   localStorage.setItem('ffi_study',studyMinutes);
   localStorage.setItem('ffi_break',breakMinutes);
-
   pauseTimer();
-
   isBreak = false;
   currentMinutes = studyMinutes;
   timeLeft = currentMinutes * 60;
-
   $('timerMode').textContent = 'Mode: Study';
-
   renderTimer();
-
   toast(`Timer set: ${studyMinutes}m study / ${breakMinutes}m break`);
 }
 
 function startTimer(){
-
   if(timerId) return;
-
   timerId = setInterval(() => {
-
     timeLeft--;
     renderTimer();
-
     if(timeLeft <= 0){
-
       clearInterval(timerId);
       timerId = null;
-
       if(!isBreak){
-
         let sessions = parseInt(localStorage.getItem('ffi_sessions') || '0') + 1;
         localStorage.setItem('ffi_sessions',sessions);
         $('sessionStat').textContent = sessions;
-
         updateTodayStudy(studyMinutes);
         refreshAnalyticsChart();
-
         toast('Study session completed! Break started.');
-
         isBreak = true;
         currentMinutes = breakMinutes;
-        timeLeft = currentMinutes * 60;
-
-        $('timerMode').textContent = 'Mode: Break';
-
       } else {
-
         toast('Break completed! Study session ready.');
-
         isBreak = false;
         currentMinutes = studyMinutes;
-        timeLeft = currentMinutes * 60;
-
-        $('timerMode').textContent = 'Mode: Study';
       }
-
+      timeLeft = currentMinutes * 60;
+      $('timerMode').textContent = isBreak ? 'Mode: Break' : 'Mode: Study';
       renderTimer();
     }
-
   },1000);
 }
 
-function pauseTimer(){
-  clearInterval(timerId);
-  timerId = null;
-}
-
+function pauseTimer(){ clearInterval(timerId); timerId = null; }
 function resetTimer(){
   pauseTimer();
   currentMinutes = isBreak ? breakMinutes : studyMinutes;
   timeLeft = currentMinutes * 60;
   renderTimer();
 }
-
 renderTimer();
 $('sessionStat').textContent = localStorage.getItem('ffi_sessions') || '0';
 
-// ===== Notes =====
-$('notes').value = localStorage.getItem('ffi_notes') || '';
 
-function saveNotes(){
-  localStorage.setItem('ffi_notes',$('notes').value);
-  toast('Notes saved');
-}
-
-function exportNotes(){
-  const blob = new Blob([$('notes').value],{type:'text/plain'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'FocusForgeIQ_Notes.txt';
-  a.click();
-}
-
-$('notes').addEventListener('input',() => {
-  clearTimeout(window.noteTimer);
-  window.noteTimer = setTimeout(() => {
-    localStorage.setItem('ffi_notes',$('notes').value);
-  },2000);
-});
-
-// ===== Streak =====
+// STREAK
 function today(){ return new Date().toISOString().split('T')[0]; }
-
-let streak = JSON.parse(localStorage.getItem('ffi_streak') ||
-  '{"count":0,"last":""}');
+let streak = JSON.parse(localStorage.getItem('ffi_streak') || '{"count":0,"last":""}');
 
 function renderStreak(){
-  $('streakDisplay').textContent =
-    `${streak.count} Day${streak.count === 1 ? '' : 's'}`;
+  $('streakDisplay').textContent = `${streak.count} Day${streak.count === 1 ? '' : 's'}`;
   $('streakStat').textContent = streak.count;
 }
 
 function markStudy(){
-
-  if(streak.last === today()){
-    toast('Already marked today');
-    return;
-  }
-
+  if(streak.last === today()) return toast('Already marked today');
   const y = new Date();
   y.setDate(y.getDate()-1);
-
   const ys = y.toISOString().split('T')[0];
-
   streak.count = streak.last === ys ? streak.count + 1 : 1;
   streak.last = today();
-
   localStorage.setItem('ffi_streak',JSON.stringify(streak));
-
   renderStreak();
-
   toast('Streak updated 🔥');
 }
-
 renderStreak();
 
-// ===== Tasks =====
-let tasks = JSON.parse(localStorage.getItem('ffi_tasks') || '[]');
 
-function renderTasks(){
-
-  $('taskList').innerHTML = '';
-
-  tasks.forEach((t,i) => {
-
-    const div = document.createElement('div');
-    div.className = 'item';
-
-    div.innerHTML = `
-      <span style="${t.done ? 'text-decoration:line-through' : ''}">${t.title}</span>
-      <div class="row">
-        <button onclick="toggleTask(${i})">${t.done ? 'Undo' : 'Done'}</button>
-        <button class="danger" onclick="deleteTask(${i})">Delete</button>
-      </div>`;
-
-    $('taskList').appendChild(div);
-  });
-
-  $('taskStat').textContent = tasks.length;
-}
-
-function addTask(){
-
-  const title = $('taskInput').value.trim();
-
-  if(!title) return;
-
-  tasks.push({title,done:false});
-
-  localStorage.setItem('ffi_tasks',JSON.stringify(tasks));
-
-  $('taskInput').value = '';
-
-  renderTasks();
-}
-
-function toggleTask(i){
-  tasks[i].done = !tasks[i].done;
-  localStorage.setItem('ffi_tasks',JSON.stringify(tasks));
-  renderTasks();
-}
-
-function deleteTask(i){
-  tasks.splice(i,1);
-  localStorage.setItem('ffi_tasks',JSON.stringify(tasks));
-  renderTasks();
-}
-
-renderTasks();
-
-// ===== Exams =====
-let exams = JSON.parse(localStorage.getItem('ffi_exams') || '[]');
-
-function renderExams(){
-
-  $('examList').innerHTML = '';
-
-  exams.sort((a,b) => new Date(a.date) - new Date(b.date));
-
-  exams.forEach((e,i) => {
-
-    const days = Math.ceil((new Date(e.date) - new Date(today())) / 86400000);
-
-    const div = document.createElement('div');
-    div.className = 'item';
-
-    div.innerHTML = `
-      <div>
-        <strong>${e.name}</strong><br>
-        <small>${e.date} • ${days} days left</small>
-      </div>
-      <button class="danger" onclick="removeExam(${i})">Delete</button>`;
-
-    $('examList').appendChild(div);
-  });
-
-  $('examStat').textContent = exams.length;
-}
-
-function addExam(){
-
-  const name = $('examName').value.trim();
-  const date = $('examDate').value;
-
-  if(!name || !date) return;
-
-  exams.push({name,date});
-
-  localStorage.setItem('ffi_exams',JSON.stringify(exams));
-
-  $('examName').value = '';
-  $('examDate').value = '';
-
-  renderExams();
-}
-
-function removeExam(i){
-  exams.splice(i,1);
-  localStorage.setItem('ffi_exams',JSON.stringify(exams));
-  renderExams();
-}
-
-renderExams();
-
-// ===== SGPA =====
+// SGPA
 let subjects = JSON.parse(localStorage.getItem('ffi_subjects') || '[]');
-
 function renderSubjects(){
-
   $('sgpaList').innerHTML = '';
-
-  let tc = 0;
-  let tp = 0;
-
+  let tc = 0, tp = 0;
   subjects.forEach((s,i) => {
-
     tc += s.credits;
     tp += s.credits * s.grade;
-
     const div = document.createElement('div');
     div.className = 'item';
-
     div.innerHTML = `
-      <div>
-        <strong>${s.name}</strong><br>
-        <small>Credits: ${s.credits} | Grade: ${s.grade}</small>
-      </div>
+      <div><strong>${s.name}</strong><br><small>Credits: ${s.credits} | Grade: ${s.grade}</small></div>
       <button class="danger" onclick="removeSubject(${i})">Delete</button>`;
-
     $('sgpaList').appendChild(div);
   });
-
-  const sgpa = tc ? (tp/tc).toFixed(2) : '0.00';
-
-  $('sgpaResult').textContent = 'SGPA: ' + sgpa;
+  $('sgpaResult').textContent = 'SGPA: ' + (tc ? (tp/tc).toFixed(2) : '0.00');
 }
 
 function addSubject(){
-
   const name = $('subName').value.trim();
   const credits = parseFloat($('credits').value);
   const grade = parseFloat($('grade').value);
-
   if(!name || isNaN(credits)) return;
-
   subjects.push({name,credits,grade});
-
   localStorage.setItem('ffi_subjects',JSON.stringify(subjects));
-
   $('subName').value = '';
   $('credits').value = '';
-
   renderSubjects();
 }
 
@@ -809,77 +720,40 @@ function removeSubject(i){
   renderSubjects();
 }
 
-renderSubjects();
 
-// ===== Analytics =====
+// ANALYTICS
 function getWeeklyStudyData(){
-
-  const user = localStorage.getItem('ffi_user_email') || 'guest';
+  const user = currentUser ? currentUser.email : 'guest';
   const key = 'ffi_weekly_' + user;
-
   if(!localStorage.getItem(key)){
-
-    const emptyWeek = {
-      Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0,Sun:0
-    };
-
-    localStorage.setItem(key,JSON.stringify(emptyWeek));
+    localStorage.setItem(key,JSON.stringify({Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0,Sun:0}));
   }
-
   return JSON.parse(localStorage.getItem(key));
 }
 
 function updateTodayStudy(minutes){
-
-  const user = localStorage.getItem('ffi_user_email') || 'guest';
-  const key = 'ffi_weekly_' + user;
-
+  const key = 'ffi_weekly_' + (currentUser ? currentUser.email : 'guest');
   const data = getWeeklyStudyData();
-
   const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const todayName = days[new Date().getDay()];
-
-  data[todayName] += minutes / 60;
-
+  data[days[new Date().getDay()]] += minutes / 60;
   localStorage.setItem(key,JSON.stringify(data));
 }
 
 const ctx = $('analyticsChart');
-
 window.analyticsChart = new Chart(ctx,{
   type:'bar',
   data:{
     labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-    datasets:[{
-      label:'Study Hours',
-      data:[0,0,0,0,0,0,0],
-      borderWidth:1
-    }]
+    datasets:[{ label:'Study Hours', data:[0,0,0,0,0,0,0], borderWidth:1 }]
   },
-  options:{
-    responsive:true,
-    scales:{
-      y:{
-        beginAtZero:true,
-        ticks:{stepSize:1}
-      }
-    }
-  }
+  options:{ responsive:true, scales:{ y:{ beginAtZero:true, ticks:{stepSize:1} } } }
 });
 
 function refreshAnalyticsChart(){
-
   const data = getWeeklyStudyData();
-
-  analyticsChart.data.datasets[0].data = [
-    data.Mon,data.Tue,data.Wed,
-    data.Thu,data.Fri,data.Sat,data.Sun
-  ];
-
+  analyticsChart.data.datasets[0].data = [data.Mon,data.Tue,data.Wed,data.Thu,data.Fri,data.Sat,data.Sun];
   analyticsChart.update();
 }
-
-refreshAnalyticsChart();
 </script>
 </body>
 </html>
