@@ -312,7 +312,6 @@ canvas{max-width:100%}
 // ==========================================
 // 1. SUPABASE INITIALIZATION
 // ==========================================
-// PASTE YOUR KEYS HERE
 const supabaseUrl = 'https://juriwtylcaamkiqdpmyn.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp1cml3dHlsY2FhbWtpcWRwbXluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ4MTksImV4cCI6MjEwMjEyMDgxOX0.mlDvGRx1kvGfbCWkvd8m7SDZLH9ri6Q2_5wDy_W2NB4';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
@@ -371,8 +370,8 @@ async function loadUserData() {
   await fetchTasks();
   await fetchExams();
   await fetchNotes();
-  renderSubjects(); // SGPA is still local
-  refreshAnalyticsChart(); // Analytics still local
+  renderSubjects(); 
+  refreshAnalyticsChart(); 
 }
 
 async function showApp(user){
@@ -551,7 +550,6 @@ async function fetchNotes() {
     $('notes').value = data[0].content;
     currentNoteId = data[0].id;
   } else if (!error) {
-    // Create an empty note row for new user
     const res = await supabase.from('notes').insert([{ content: '', user_id: currentUser.id }]).select();
     if(res.data) currentNoteId = res.data[0].id;
   }
@@ -573,7 +571,6 @@ function exportNotes(){
   a.click();
 }
 
-// Auto-save typing locally, manual button saves to cloud (saves DB reads/writes)
 $('notes').addEventListener('input',() => {
   clearTimeout(window.noteTimer);
   window.noteTimer = setTimeout(() => {
@@ -584,9 +581,6 @@ $('notes').addEventListener('input',() => {
 // ==========================================
 // 7. LOCAL FEATURES (Timer, Streak, SGPA)
 // ==========================================
-// (These remain in local storage for speed and offline usage)
-
-// POMODORO
 let studyMinutes = parseInt(localStorage.getItem('ffi_study') || '25');
 let breakMinutes = parseInt(localStorage.getItem('ffi_break') || '5');
 $('studyInput').value = studyMinutes;
@@ -660,8 +654,6 @@ function resetTimer(){
 renderTimer();
 $('sessionStat').textContent = localStorage.getItem('ffi_sessions') || '0';
 
-
-// STREAK
 function today(){ return new Date().toISOString().split('T')[0]; }
 let streak = JSON.parse(localStorage.getItem('ffi_streak') || '{"count":0,"last":""}');
 
@@ -683,8 +675,6 @@ function markStudy(){
 }
 renderStreak();
 
-
-// SGPA
 let subjects = JSON.parse(localStorage.getItem('ffi_subjects') || '[]');
 function renderSubjects(){
   $('sgpaList').innerHTML = '';
@@ -720,8 +710,6 @@ function removeSubject(i){
   renderSubjects();
 }
 
-
-// ANALYTICS
 function getWeeklyStudyData(){
   const user = currentUser ? currentUser.email : 'guest';
   const key = 'ffi_weekly_' + user;
